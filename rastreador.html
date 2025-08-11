@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rastreador Estilo Uber + Pop99</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f7f9fc;
+      color: #1c1c1c;
+    }
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+    /* Painel lateral estilo Uber/Pop99 */
+    #sidebar {
+      position: absolute;
+      top: 10px; left: 10px;
+      width: 320px;
+      max-height: 95vh;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+      padding: 20px 25px;
+      font-size: 14px;
+      color: #222;
+      user-select: none;
+      overflow-y: auto;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+    #sidebar.collapsed {
+      transform: translateX(-310px);
+    }
+    #toggleBtn {
+      position: absolute;
+      top: 25px; left: 335px;
+      background: #0066ff;
+      color: white;
+      border:none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,102,255,0.4);
+      z-index: 1100;
+    }
+    #toggleBtn:hover {
+      background: #004bbd;
+    }
+    label {
+      font-weight: 600;
+      margin-top: 12px;
+      display: block;
+      color: #222;
+    }
+    input, select, button {
+      width: 100%;
+      margin: 8px 0 15px 0;
+      box-sizing: border-box;
+      padding: 12px 15px;
+      font-size: 15px;
+      border-radius: 8px;
+      border: 1.5px solid #ccc;
+      outline: none;
+      transition: border-color 0.3s ease;
+      font-weight: 500;
+      color: #333;
+      background-color: #fff;
+    }
+    input:focus, select:focus {
+      border-color: #0066ff;
+      box-shadow: 0 0 8px rgba(0,102,255,0.3);
+    }
+    button {
+      background-color: #0066ff;
+      color: white;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.25s ease;
+      user-select: none;
+    }
+    button:hover:not(:disabled) {
+      background-color: #004bbd;
+    }
+    button:disabled {
+      background-color: #a0c0ff;
+      cursor: default;
+    }
+    select[multiple] {
+      height: 90px;
+    }
+    .info-line {
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="sidebar" class="">
+  <h2>Rastreamento e Rota</h2>
+
+  <label for="motoristaNome">Nome do Motorista</label>
+  <input type="text" id="motoristaNome" placeholder="Ex: João Silva" autocomplete="off" />
+
+  <label for="MarcaNome">Marca do Caminhão</label>
+  <input type="text" id="MarcaNome" placeholder="Ex: Volkswagen" autocomplete="off" />
+
+  <label for="placaCaminhao">Placa do Caminhão</label>
+  <input type="text" id="placaCaminhao" placeholder="Ex: ABC-1234" autocomplete="off" />
+
+  <label for="horaSaida">Hora de Saída</label>
+  <input type="time" id="horaSaida" />
+
+  <label for="selectPontos">Pontos de Coleta (múltiplos)</label>
+  <select id="selectPontos" multiple></select>
+
+  <button id="btnCriarRota" type="button">Criar Rota</button>
+  <button id="btnGerarPDF" type="button" disabled>Gerar PDF</button>
+  <button id="btnLimparRota" type="button">Limpar Rota</button>
+
+  <hr>
+
+  <div class="info-line" id="infoStatus">Status: <em>Aguardando ação</em></div>
+  <button id="btnStartStop">Iniciar Rastreamento</button>
+
+  <div class="info-line" id="infoUltimaAtualizacao">Última atualização: --:--:--</div>
+</div>
+
+<button id="toggleBtn">‹</button>
+
+<script>
+  // Sua API key ORS (substitua se quiser)
+  const ORS_API_KEY = '5b3ce3597851110001cf6248823d7211d8d04a148dd4d10797c1b67e';
+
+  // Inicialização do mapa
+  const map = L.map('map', { zoomControl: false }).setView([-15.65, -56.17], 13);
+  L.control.zoom({ position: 'topright' }).addTo(map);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Ícones personalizados
+  const truckIcon = L.divIcon({
+    className: "custom-truck-icon",
+    html: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#0066ff" xmlns="http://www.w3.org/2000/svg" aria-label="Caminhão">
+      <path d="M3 3h13v13H3V3zm17 6h-4v7h4v-7zM5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm10 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+    </svg>`
+  });
+
+  const jobIcon = L.divIcon({
+    className: "custom-job-icon",
+    html: `<svg width="24" height="24" fill="#0066ff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-label="Ponto de Coleta">
+      <circle cx="12" cy="12" r="10" stroke="#0066ff" stroke-width="2" fill="white"/>
+      <circle cx="12" cy="12" r="6" fill="#0066ff"/>
+    </svg>`
+  });
+
+  // Dados do caminhão (posição inicial)
+  let caminhao = {
+    location: [-56.175328, -15.652225], // lng, lat
+    motorista: '',
+    Marca: '',
+    placa: '',
+    horaSaida: ''
+  };
+
+  // Marcador do caminhão no mapa
+  let caminhaoMarker = L.marker([caminhao.location[1], caminhao.location[0]], {icon: truckIcon}).addTo(map);
+
+  // Pontos de coleta (exemplo)
+  const jobs = [
+    { id: 1, nome: 'Comper', location: [-56.173280, -15.640710] },
+    { id: 2, nome: 'Atacadão', location: [-56.169217, -15.639215] },
+    { id: 3, nome: 'Big Lar', location: [-56.139058 , -15.649649] }
+  ];
+
+  // Marcadores dos pontos no mapa
+  let jobMarkers = [];
+  function desenharPontos() {
+    jobMarkers.forEach(m => map.removeLayer(m));
+    jobMarkers = [];
+    jobs.forEach(j => {
+      const mk = L.marker([j.location[1], j.location[0]], {icon: jobIcon})
+        .addTo(map)
+        .bindPopup(`<strong>${j.nome}</strong>`);
+      jobMarkers.push(mk);
+    });
+  }
+  desenharPontos();
+
+  // Preencher select múltiplo com pontos
+  function preencherSelect() {
+    const selectPontos = document.getElementById('selectPontos');
+    selectPontos.innerHTML = '';
+    jobs.forEach(j => {
+      const option = document.createElement('option');
+      option.value = j.id;
+      option.textContent = j.nome;
+      selectPontos.appendChild(option);
+    });
+  }
+  preencherSelect();
+
+  // Variáveis para rota e rastreamento
+  let rotaLayer = null;
+  let markersRotas = [];
+  let chegadaPorJob = {};
+  let pontosSelecionados = [];
+  let tempoTotalSegundos = 0;
+  let distanciaTotalMetros = 0;
+
+  // Atualizar popup do caminhão com dados
+  function atualizarPopupCaminhao() {
+    const textoPopup = `
+      <p><b>Caminhão</b></p>
+      <p>Motorista: ${caminhao.motorista || 'N/D'}</p>
+      <p>Marca: ${caminhao.Marca || 'N/D'}</p>
+      <p>Placa: ${caminhao.placa || 'N/D'}</p>
+      <p>Hora de Saída: ${caminhao.horaSaida || 'N/D'}</p>
+    `;
+    caminhaoMarker.bindPopup(textoPopup);
+  }
+  atualizarPopupCaminhao();
+
+  // Função para calcular rota otimizada via ORS
+  async function calcularRotaMultiplosPontos(pontos) {
+    if (rotaLayer) {
+      map.removeLayer(rotaLayer);
+      rotaLayer = null;
+    }
+    markersRotas.forEach(m => map.removeLayer(m));
+    markersRotas = [];
+    chegadaPorJob = {};
+    tempoTotalSegundos = 0;
+    distanciaTotalMetros = 0;
+
+    // Atualiza dados do caminhão do formulário
+    caminhao.motorista = document.getElementById('motoristaNome').value.trim();
+    caminhao.Marca = document.getElementById('MarcaNome').value.trim();
+    caminhao.placa = document.getElementById('placaCaminhao').value.trim();
+    caminhao.horaSaida = document.getElementById('horaSaida').value;
+
+    atualizarPopupCaminhao();
+
+    // Construir corpo VRP ORS
+    const vrpBody = {
+      vehicles: [{
+        id: 1,
+        profile: 'driving-car',
+        start: caminhao.location,
+        end: caminhao.location,
+        capacity: [pontos.length]
+      }],
+      jobs: pontos.map(p => ({
+        id: p.id,
+        location: p.location,
+        amount: [1],
+        service: 300
+      }))
+    };
+
+    const url = 'https://api.openrouteservice.org/optimization';
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': ORS_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(vrpBody)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      alert('Erro na API ORS: ' + response.status + ' - ' + errorText);
+      return;
+    }
+
+    const data = await response.json();
+
+    data.routes[0].steps.forEach(step => {
+      if (step.type === 'job') {
+        chegadaPorJob[step.job] = step.arrival;
+      }
+    });
+
+    const sequencia = data.routes[0].steps
+      .filter(s => s.type === 'job')
+      .map(s => s.job);
+
+    pontosSelecionados = sequencia.map(id => pontos.find(p => p.id === id));
+
+    // Coords para rota: saída, pontos na ordem, volta ao início
+    const coords = [caminhao.location].concat(pontosSelecionados.map(p => p.location), [caminhao.location]);
+
+    const urlRota = 'https://api.openrouteservice.org/v2/directions/driving-car/geojson';
+    const bodyRota = { coordinates: coords };
+
+    const resRota = await fetch(urlRota, {
+      method: 'POST',
+      headers: {
+        'Authorization': ORS_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(bodyRota)
+    });
+
+    if (!resRota.ok) {
+      const errorText = await resRota.text();
+      alert('Erro ao desenhar rota: ' + resRota.status + ' - ' + errorText);
+      return;
+    }
+
+    const geojson = await resRota.json();
+
+    tempoTotalSegundos = 0;
+    distanciaTotalMetros = 0;
+    if (geojson.features && geojson.features.length > 0) {
+      geojson.features.forEach(feature => {
+        if (feature.properties && feature.properties.summary) {
+          tempoTotalSegundos += feature.properties.summary.duration;
+          distanciaTotalMetros += feature.properties.summary.distance;
+        }
+      });
+    }
+
+    rotaLayer = L.geoJSON(geojson, { style: { color: '#0066ff', weight: 6, opacity: 0.85 } }).addTo(map);
+
+    map.fitBounds(rotaLayer.getBounds(), { padding: [50, 50] });
+
+    pontosSelecionados.forEach(p => {
+      const segs = chegadaPorJob[p.id] || 0;
+      const minutos = Math.round(segs / 60);
+      const marker = L.marker([p.location[1], p.location[0]], {icon: jobIcon})
+        .addTo(map)
+        .bindPopup(`<strong>${p.nome}</strong><br><small>Chegada prevista: ~${minutos} min</small>`);
+      markersRotas.push(marker);
+    });
+
+    // Ativa botão gerar PDF
+    document.getElementById('btnGerarPDF').disabled = false;
+  }
+
+  // Funções para limpar rota
+  function limparRota() {
+    if (rotaLayer) {
+      map.removeLayer(rotaLayer);
+      rotaLayer = null;
+    }
+    markersRotas.forEach(m => map.removeLayer(m));
+    markersRotas = [];
+    pontosSelecionados = [];
+    chegadaPorJob = {};
+    tempoTotalSegundos = 0;
+    distanciaTotalMetros = 0;
+    document.getElementById('btnGerarPDF').disabled = true;
+    document.getElementById('infoStatus').innerHTML = 'Status: <em>Rota limpa</em>';
+  }
+
+  // Gerar PDF com dados da rota
+  function gerarPDF() {
+    if (pontosSelecionados.length === 0) {
+      alert('Crie a rota antes de gerar o PDF.');
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text('Relatório de Rota de Coleta', 10, 15);
+
+    doc.setFontSize(12);
+    doc.text(`Motorista: ${caminhao.motorista || 'N/D'}`, 10, 30);
+    doc.text(`Marca: ${caminhao.Marca || 'N/D'}`, 10, 40);
+    doc.text(`Placa: ${caminhao.placa || 'N/D'}`, 10, 50);
+    doc.text(`Hora de Saída: ${caminhao.horaSaida || 'N/D'}`, 10, 60);
+    doc.text('Pontos de Coleta e Tempo Estimado:', 10, 75);
+
+    let y = 85;
+    pontosSelecionados.forEach((p, i) => {
+      const segs = chegadaPorJob[p.id] || 0;
+      const minutos = Math.round(segs / 60);
+      doc.text(`${i + 1}. ${p.nome} - Chegada prevista: ~${minutos} min`, 10, y);
+      y += 10;
+    });
+
+    doc.text(`Tempo total estimado (ida e volta): ~${Math.round(tempoTotalSegundos / 60)} min`, 10, y + 10);
+    doc.text(`Distância total estimada: ~${(distanciaTotalMetros / 1000).toFixed(2)} km`, 10, y + 20);
+
+    doc.save('relatorio_rota_coleta.pdf');
+  }
+
+  // RASTREAMENTO REAL COM GEOLOCALIZAÇÃO
+  let watchId = null;
+
+  function iniciarRastreamento() {
+    if (!navigator.geolocation) {
+      alert("Geolocalização não é suportada pelo seu navegador.");
+      return;
+    }
+
+    document.getElementById('infoStatus').innerHTML = 'Status: <em>Rastreamento ativo</em>';
+
+    watchId = navigator.geolocation.watchPosition(
+      pos => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        // Atualiza marcador e dados
+        caminhaoMarker.setLatLng([lat, lng]);
+        caminhao.location = [lng, lat];
+        atualizarPopupCaminhao();
+
+        // Centraliza mapa suavemente
+        map.panTo([lat, lng]);
+
+        // Atualiza última atualização no painel
+        document.getElementById('infoUltimaAtualizacao').textContent =
+          'Última atualização: ' + new Date().toLocaleTimeString();
+
+      },
+      err => {
+        alert('Erro ao obter posição: ' + err.message);
+        document.getElementById('infoStatus').innerHTML = 'Status: <em>Erro no rastreamento</em>';
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 3000,
+        timeout: 10000
+      }
+    );
+  }
+
+  function pararRastreamento() {
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+      document.getElementById('infoStatus').innerHTML = 'Status: <em>Rastreamento parado</em>';
+    }
+  }
+
+  // Botão iniciar/parar rastreamento
+  document.getElementById('btnStartStop').addEventListener('click', () => {
+    if (watchId === null) {
+      iniciarRastreamento();
+      document.getElementById('btnStartStop').textContent = 'Parar Rastreamento';
+    } else {
+      pararRastreamento();
+      document.getElementById('btnStartStop').textContent = 'Iniciar Rastreamento';
+    }
+  });
+
+  // Botões criar rota, limpar rota e gerar pdf
+  document.getElementById('btnCriarRota').addEventListener('click', () => {
+    const selectPontos = document.getElementById('selectPontos');
+    const selectedOptions = Array.from(selectPontos.selectedOptions);
+
+    if (selectedOptions.length === 0) {
+      alert('Selecione pelo menos um ponto de coleta.');
+      return;
+    }
+
+    const pontosSelecionados = selectedOptions.map(o => {
+      const id = Number(o.value);
+      return jobs.find(j => j.id === id);
+    });
+
+    calcularRotaMultiplosPontos(pontosSelecionados);
+  });
+
+  document.getElementById('btnLimparRota').addEventListener('click', () => {
+    limparRota();
+  });
+
+  document.getElementById('btnGerarPDF').addEventListener('click', () => {
+    gerarPDF();
+  });
+
+  // Painel lateral toggle
+  const sidebar = document.getElementById('sidebar');
+  const toggleBtn = document.getElementById('toggleBtn');
+  toggleBtn.addEventListener('click', () => {
+    if (sidebar.classList.contains('collapsed')) {
+      sidebar.classList.remove('collapsed');
+      toggleBtn.textContent = '‹';
+    } else {
+      sidebar.classList.add('collapsed');
+      toggleBtn.textContent = '›';
+    }
+  });
+
+</script>
+
+</body>
+</html>
