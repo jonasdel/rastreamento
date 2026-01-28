@@ -1,549 +1,190 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <title>Rastreador Estilo Uber + Pop99</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8">
+<title>Coleta Seletiva – Várzea Grande MT</title>
 
-  <!-- Fonte Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <!-- jsPDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://js.arcgis.com/4.29/"></script>
 
-  <style>
-    html, body {
-      margin: 0; padding: 0; height: 100%;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      background: #f7f9fc;
-      color: #222;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    #map {
-      height: 100vh;
-      width: 100%;
-      transition: margin-left 0.3s ease;
-    }
-
-    #sidebar {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      width: 350px;
-      max-height: 95vh;
-      background: #ffffff;
-      border-radius: 14px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-      padding: 25px 30px;
-      font-size: 15px;
-      color: #222;
-      user-select: none;
-      overflow-y: auto;
-      z-index: 1050;
-      transition: transform 0.35s ease;
-      scrollbar-width: thin;
-      scrollbar-color: #a0c0ff #f1f3f8;
-    }
-
-    #sidebar::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    #sidebar::-webkit-scrollbar-track {
-      background: #f1f3f8;
-      border-radius: 8px;
-    }
-
-    #sidebar::-webkit-scrollbar-thumb {
-      background-color: #7a9eff;
-      border-radius: 8px;
-      border: 2px solid #f1f3f8;
-    }
-
-    #sidebar.collapsed {
-      transform: translateX(-370px);
-    }
-
-    #toggleBtn {
-      position: absolute;
-      top: 35px;
-      left: 375px;
-      width: 42px;
-      height: 42px;
-      background: #0066ff;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 22px;
-      cursor: pointer;
-      font-weight: 700;
-      box-shadow: 0 4px 12px rgba(0,102,255,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1100;
-      transition: background-color 0.3s ease;
-    }
-
-    #toggleBtn:hover {
-      background: #004bbd;
-    }
-
-    h2 {
-      margin-top: 0;
-      font-weight: 700;
-      font-size: 22px;
-      color: #003d99;
-      margin-bottom: 10px;
-    }
-
-    #sidebar p.subtitle {
-      color: #666;
-      font-size: 14px;
-      margin-top: -5px;
-      margin-bottom: 15px;
-    }
-
-    label {
-      font-weight: 600;
-      margin-top: 18px;
-      display: block;
-      color: #1c1c1c;
-      letter-spacing: 0.02em;
-    }
-
-    input, select, button {
-      width: 100%;
-      margin: 8px 0 18px 0;
-      box-sizing: border-box;
-      padding: 14px 16px;
-      font-size: 16px;
-      border-radius: 12px;
-      border: 1.8px solid #ccc;
-      outline: none;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-      font-weight: 500;
-      color: #333;
-      background-color: #fff;
-      font-family: inherit;
-      user-select: text;
-    }
-
-    input:focus, select:focus {
-      border-color: #4a90e2;
-      box-shadow: 0 0 12px rgba(74,144,226,0.4);
-    }
-
-    button {
-      background-color: #0066ff;
-      color: white;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.25s ease, box-shadow 0.25s ease;
-      user-select: none;
-      box-shadow: 0 4px 14px rgba(0, 102, 255, 0.35);
-    }
-
-    button:hover:not(:disabled) {
-      background-color: #004bbd;
-      box-shadow: 0 6px 18px rgba(0, 75, 189, 0.5);
-    }
-
-    button:disabled {
-      background-color: #a0c0ff;
-      cursor: default;
-      box-shadow: none;
-    }
-
-    select[multiple] {
-      height: 110px;
-      padding-top: 10px;
-      padding-bottom: 10px;
-      font-size: 14px;
-    }
-
-    .info-line {
-      margin-bottom: 14px;
-      font-weight: 600;
-      font-size: 15px;
-      color: #555;
-    }
-
-    @media (max-width: 480px) {
-      #sidebar {
-        width: 100%;
-        max-height: 50vh;
-        left: 0;
-        top: auto;
-        bottom: 0;
-        border-radius: 12px 12px 0 0;
-        padding: 20px 25px;
-        overflow-y: scroll;
-      }
-      #sidebar.collapsed {
-        transform: translateY(100%);
-      }
-      #toggleBtn {
-        top: auto;
-        bottom: 60vh;
-        left: 15px;
-        width: 36px;
-        height: 36px;
-        font-size: 20px;
-      }
-    }
-  </style>
+<style>
+body { margin:0; font-family:Arial; background:#f4f6f8; }
+header { background:#2e7d32; color:#fff; padding:14px; text-align:center; font-weight:bold; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; padding:12px; }
+.card { background:#fff; border-radius:8px; padding:12px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,.1); }
+.card span { font-size:22px; font-weight:bold; color:#2e7d32; }
+.filters { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; padding:12px; }
+select,button { padding:8px; border-radius:6px; border:1px solid #ccc; }
+button { background:#2e7d32; color:#fff; border:none; cursor:pointer; }
+#mapDiv { height:60vh; margin:12px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.15); }
+footer { text-align:center; padding:10px; font-size:13px; color:#666; }
+</style>
 </head>
+
 <body>
 
-<div id="map"></div>
+<header>♻️ Coleta Seletiva – Várzea Grande / MT</header>
 
-<div id="sidebar" class="">
-  <h2>Rastreamento e Rota</h2>
-  <p class="subtitle">Informe os dados e selecione os pontos para criar a rota.</p>
-
-  <label for="motoristaNome">Nome do Motorista</label>
-  <input type="text" id="motoristaNome" placeholder="Ex: João Silva" autocomplete="off" />
-
-  <label for="MarcaNome">Marca do Caminhão</label>
-  <input type="text" id="MarcaNome" placeholder="Ex: Volkswagen" autocomplete="off" />
-
-  <label for="placaCaminhao">Placa do Caminhão</label>
-  <input type="text" id="placaCaminhao" placeholder="Ex: ABC-1234" autocomplete="off" />
-
-  <label for="horaSaida">Hora de Saída</label>
-  <input type="time" id="horaSaida" />
-
-  <label for="selectPontos">Pontos de Coleta (múltiplos)</label>
-  <select id="selectPontos" multiple></select>
-
-  <button id="btnCriarRota" type="button">Criar Rota</button>
-  <button id="btnGerarPDF" type="button" disabled>Gerar PDF</button>
-  <button id="btnLimparRota" type="button">Limpar Rota</button>
-
-  <hr>
-
-  <div class="info-line" id="infoStatus">Status: <em>Aguardando ação</em></div>
-  <button id="btnStartStop">Iniciar Rastreamento</button>
-
-  <div class="info-line" id="infoUltimaAtualizacao">Última atualização: --:--:--</div>
+<div class="cards">
+  <div class="card">Pontos<br><span id="total">0</span></div>
+  <div class="card">Plástico<br><span id="plastico">0</span></div>
+  <div class="card">Papel<br><span id="papel">0</span></div>
+  <div class="card">Vidro<br><span id="vidro">0</span></div>
 </div>
 
-<button id="toggleBtn">‹</button>
+<div class="filters">
+  <select id="bairro"><option value="">Todos os bairros</option></select>
+  <select id="dia"><option value="">Todos os dias</option></select>
+  <select id="residuo">
+    <option value="">Todos os resíduos</option>
+    <option value="Plástico">Plástico</option>
+    <option value="Papel">Papel</option>
+    <option value="Vidro">Vidro</option>
+  </select>
+  <button id="aplicar">Aplicar filtros</button>
+  <button id="limpar">Limpar filtros</button>
+  <button id="gerarPdf">Gerar PDF</button>
+</div>
+
+<div id="mapDiv"></div>
+
+<footer>Sistema público de coleta seletiva • Várzea Grande – MT</footer>
 
 <script>
-  // (Mantive seu JavaScript original, pois pediu só visual)
-  // Sua API key ORS (substitua se quiser)
-  const ORS_API_KEY = '5b3ce3597851110001cf6248823d7211d8d04a148dd4d10797c1b67e';
+require([
+  "esri/Map",
+  "esri/views/MapView",
+  "esri/layers/GeoJSONLayer"
+], function(Map, MapView, GeoJSONLayer) {
 
-  // Inicialização do mapa
-  const map = L.map('map', { zoomControl: false }).setView([-15.65, -56.17], 13);
-  L.control.zoom({ position: 'topright' }).addTo(map);
+  const geojsonUrl = "https://www.arcgis.com/sharing/rest/content/items/68286e2213af416f923295dab9915433/data";
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(map);
-
-  // Ícones personalizados
-  const truckIcon = L.divIcon({
-    className: "custom-truck-icon",
-    html: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#0066ff" xmlns="http://www.w3.org/2000/svg" aria-label="Caminhão">
-      <path d="M3 3h13v13H3V3zm17 6h-4v7h4v-7zM5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm10 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
-    </svg>`
+  const layer = new GeoJSONLayer({
+    url: geojsonUrl,
+    title: "Pontos de Coleta",
+    outFields: ["*"],
+    popupTemplate: {
+      title: "{Nome}",
+      content: `
+        <b>Endereço:</b> {endereco}<br>
+        <b>Bairro:</b> {bairro}<br>
+        <b>Cidade:</b> {Cidade} - {Estado}<br>
+        <b>Resíduo:</b> {residuo}<br>
+        <b>Dia da Coleta:</b> {dia_semana}
+      `
+    },
+    renderer: {
+      type: "unique-value",
+      field: "residuo",
+      uniqueValueInfos: [
+        { value:"Plástico", symbol:{ type:"simple-marker", color:"#fdd835", size:12, outline:{color:"#fff", width:1} }},
+        { value:"Papel",    symbol:{ type:"simple-marker", color:"#42a5f5", size:12, outline:{color:"#fff", width:1} }},
+        { value:"Vidro",    symbol:{ type:"simple-marker", color:"#66bb6a", size:12, outline:{color:"#fff", width:1} }}
+      ]
+    }
   });
 
-  const jobIcon = L.divIcon({
-    className: "custom-job-icon",
-    html: `<svg width="24" height="24" fill="#0066ff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-label="Ponto de Coleta">
-      <circle cx="12" cy="12" r="10" stroke="#0066ff" stroke-width="2" fill="white"/>
-      <circle cx="12" cy="12" r="6" fill="#0066ff"/>
-    </svg>`
+  const map = new Map({ basemap: "streets-navigation-vector", layers: [layer] });
+  const view = new MapView({
+    container: "mapDiv",
+    map: map,
+    center: [-56.132, -15.646],
+    zoom: 13,
+    constraints: { minZoom: 11, maxZoom: 18 }
   });
 
-  // Dados do caminhão (posição inicial)
-  let caminhao = {
-    location: [-56.175328, -15.652225], // lng, lat
-    motorista: '',
-    Marca: '',
-    placa: '',
-    horaSaida: ''
+  const bairro = document.getElementById("bairro");
+  const dia = document.getElementById("dia");
+  const residuo = document.getElementById("residuo");
+  const total = document.getElementById("total");
+  const plastico = document.getElementById("plastico");
+  const papel = document.getElementById("papel");
+  const vidro = document.getElementById("vidro");
+  const aplicar = document.getElementById("aplicar");
+  const limpar = document.getElementById("limpar");
+  const gerarPdf = document.getElementById("gerarPdf");
+
+  layer.when(() => {
+    popularFiltros();
+    atualizarCards();
+  });
+
+  function popularFiltros() {
+    layer.queryFeatures({ where:"1=1", outFields:["bairro","dia_semana"], returnDistinctValues:true })
+      .then(r => {
+        [...new Set(r.features.map(f=>f.attributes.bairro))].filter(Boolean).sort()
+          .forEach(v=>bairro.add(new Option(v,v)));
+        [...new Set(r.features.map(f=>f.attributes.dia_semana))].filter(Boolean).sort()
+          .forEach(v=>dia.add(new Option(v,v)));
+      });
+  }
+
+  function atualizarCards() {
+    layer.queryFeatures({ where: layer.definitionExpression||"1=1", returnGeometry:false })
+      .then(r=>{
+        total.textContent = r.features.length;
+        plastico.textContent = r.features.filter(f=>f.attributes.residuo==="Plástico").length;
+        papel.textContent = r.features.filter(f=>f.attributes.residuo==="Papel").length;
+        vidro.textContent = r.features.filter(f=>f.attributes.residuo==="Vidro").length;
+      });
+  }
+
+  aplicar.onclick = async () => {
+    let where = "1=1";
+    if(bairro.value) where += ` AND bairro='${bairro.value}'`;
+    if(dia.value) where += ` AND dia_semana='${dia.value}'`;
+    if(residuo.value) where += ` AND residuo='${residuo.value}'`;
+
+    layer.definitionExpression = where;
+    atualizarCards();
+
+    const result = await layer.queryFeatures({ where:where, returnGeometry:true });
+    const featuresWithGeom = result.features.filter(f=>f.geometry);
+
+    if(featuresWithGeom.length>0){
+      const extent = featuresWithGeom.map(f=>f.geometry.extent||f.geometry)
+        .reduce((ext,e)=>ext?ext.union(e):e);
+      view.goTo(extent.expand(1.5));
+      view.popup.open({ features:[featuresWithGeom[0]], location:featuresWithGeom[0].geometry });
+    }else{
+      view.popup.close();
+    }
   };
 
-  // Marcador do caminhão no mapa
-  let caminhaoMarker = L.marker([caminhao.location[1], caminhao.location[0]], {icon: truckIcon}).addTo(map);
+  limpar.onclick = () => {
+    bairro.value = ""; dia.value = ""; residuo.value = "";
+    layer.definitionExpression = "1=1";
+    atualizarCards();
+    view.popup.close();
+    view.goTo({center:[-56.132,-15.646], zoom:13});
+  };
 
-  // Pontos de coleta (exemplo)
-  const jobs = [
-    { id: 1, nome: 'Comper', location: [-56.173280, -15.640710] },
-    { id: 2, nome: 'Atacadão', location: [-56.169217, -15.639215] },
-    { id: 3, nome: 'Big Lar', location: [-56.139058 , -15.649649] }
-  ];
-
-  // Marcadores dos pontos no mapa
-  let jobMarkers = [];
-  function desenharPontos() {
-    jobMarkers.forEach(m => map.removeLayer(m));
-    jobMarkers = [];
-    jobs.forEach(j => {
-      const mk = L.marker([j.location[1], j.location[0]], {icon: jobIcon})
-        .addTo(map)
-        .bindPopup(`<strong>${j.nome}</strong>`);
-      jobMarkers.push(mk);
-    });
-  }
-  desenharPontos();
-
-  // Preencher select múltiplo com pontos
-  function preencherSelect() {
-    const selectPontos = document.getElementById('selectPontos');
-    selectPontos.innerHTML = '';
-    jobs.forEach(j => {
-      const option = document.createElement('option');
-      option.value = j.id;
-      option.textContent = j.nome;
-      selectPontos.appendChild(option);
-    });
-  }
-  preencherSelect();
-
-  // Variáveis para rota e rastreamento
-  let rotaLayer = null;
-  let markersRotas = [];
-  let chegadaPorJob = {};
-  let pontosSelecionados = [];
-  let tempoTotalSegundos = 0;
-  let distanciaTotalMetros = 0;
-
-  // Atualizar popup do caminhão com dados
-  function atualizarPopupCaminhao() {
-    const textoPopup = `
-      <p><b>Caminhão</b></p>
-      <p>Motorista: ${caminhao.motorista || 'N/D'}</p>
-      <p>Marca: ${caminhao.Marca || 'N/D'}</p>
-      <p>Placa: ${caminhao.placa || 'N/D'}</p>
-      <p>Hora de Saída: ${caminhao.horaSaida || 'N/D'}</p>
-    `;
-    caminhaoMarker.bindPopup(textoPopup);
-  }
-  atualizarPopupCaminhao();
-
-  // Função para calcular rota otimizada via ORS
-  async function calcularRotaMultiplosPontos(pontos) {
-    if (rotaLayer) {
-      map.removeLayer(rotaLayer);
-      rotaLayer = null;
-    }
-    markersRotas.forEach(m => map.removeLayer(m));
-    markersRotas = [];
-    chegadaPorJob = {};
-    tempoTotalSegundos = 0;
-    distanciaTotalMetros = 0;
-
-    // Atualiza dados do caminhão do formulário
-    caminhao.motorista = document.getElementById('motoristaNome').value.trim();
-    caminhao.Marca = document.getElementById('MarcaNome').value.trim();
-    caminhao.placa = document.getElementById('placaCaminhao').value.trim();
-    caminhao.horaSaida = document.getElementById('horaSaida').value;
-
-    atualizarPopupCaminhao();
-
-    // Construir corpo VRP ORS
-    const vrpBody = {
-      vehicles: [{
-        id: 1,
-        profile: 'driving-car',
-        start: caminhao.location,
-        end: caminhao.location,
-        capacity: [pontos.length]
-      }],
-      jobs: pontos.map(p => ({
-        id: p.id,
-        location: p.location,
-        amount: [1],
-        service: 300
-      }))
-    };
-
-    const url = 'https://api.openrouteservice.org/optimization';
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': ORS_API_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(vrpBody)
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      alert('Erro na API ORS: ' + response.status + ' - ' + errorText);
-      return;
-    }
-
-    const data = await response.json();
-
-    data.routes[0].steps.forEach(step => {
-      if (step.type === 'job') {
-        chegadaPorJob[step.job] = step.arrival;
-      }
-    });
-
-    const sequencia = data.routes[0].steps
-      .filter(s => s.type === 'job')
-      .map(s => s.job);
-
-    pontosSelecionados = sequencia.map(id => pontos.find(p => p.id === id));
-
-    // Coords para rota: saída, pontos na ordem, volta ao início
-    const coords = [caminhao.location].concat(pontosSelecionados.map(p => p.location), [caminhao.location]);
-
-    const urlRota = 'https://api.openrouteservice.org/v2/directions/driving-car/geojson';
-    const bodyRota = { coordinates: coords };
-
-    const resRota = await fetch(urlRota, {
-      method: 'POST',
-      headers: {
-        'Authorization': ORS_API_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(bodyRota)
-    });
-
-    if (!resRota.ok) {
-      const errorText = await resRota.text();
-      alert('Erro ao desenhar rota: ' + resRota.status + ' - ' + errorText);
-      return;
-    }
-
-    const geojson = await resRota.json();
-
-    tempoTotalSegundos = 0;
-    distanciaTotalMetros = 0;
-    if (geojson.features && geojson.features.length > 0) {
-      geojson.features.forEach(feature => {
-        if (feature.properties && feature.properties.summary) {
-          tempoTotalSegundos += feature.properties.summary.duration;
-          distanciaTotalMetros += feature.properties.summary.distance;
-        }
-      });
-    }
-
-    rotaLayer = L.geoJSON(geojson, { style: { color: '#0066ff', weight: 6, opacity: 0.85 } }).addTo(map);
-
-    map.fitBounds(rotaLayer.getBounds(), { padding: [50, 50] });
-
-    pontosSelecionados.forEach(p => {
-      const segs = chegadaPorJob[p.id] || 0;
-      const minutos = Math.round(segs / 60);
-      const marker = L.marker([p.location[1], p.location[0]], {icon: jobIcon})
-        .addTo(map)
-        .bindPopup(`<strong>${p.nome}</strong><br><small>Chegada prevista: ~${minutos} min</small>`);
-      markersRotas.push(marker);
-    });
-
-    // Ativa botão gerar PDF
-    document.getElementById('btnGerarPDF').disabled = false;
-  }
-
-  // Funções para limpar rota
-  function limparRota() {
-    if (rotaLayer) {
-      map.removeLayer(rotaLayer);
-      rotaLayer = null;
-    }
-    markersRotas.forEach(m => map.removeLayer(m));
-    markersRotas = [];
-    pontosSelecionados = [];
-    chegadaPorJob = {};
-    tempoTotalSegundos = 0;
-    distanciaTotalMetros = 0;
-    document.getElementById('btnGerarPDF').disabled = true;
-    document.getElementById('infoStatus').innerHTML = 'Status: <em>Rota limpa</em>';
-  }
-
-  // Gerar PDF com dados da rota
-  function gerarPDF() {
-    if (pontosSelecionados.length === 0) {
-      alert('Crie a rota antes de gerar o PDF.');
-      return;
-    }
+  gerarPdf.onclick = async () => {
     const { jsPDF } = window.jspdf;
+    const result = await layer.queryFeatures({ where: layer.definitionExpression||"1=1", returnGeometry:false });
+
+    if(result.features.length===0){ alert("Não há dados para gerar relatório!"); return; }
+
+    const rows = result.features.map(f=>{
+      const a = f.attributes;
+      return [a.Nome, a.endereco, a.bairro, a.residuo, a.dia_semana];
+    });
+
     const doc = new jsPDF();
-
-    doc.setFontSize(18);
-    doc.text('Roteiro de Entrega', 14, 20);
-
+    doc.setFontSize(16);
+    doc.text("Relatório de Coleta Seletiva - Várzea Grande/MT", 14, 20);
     doc.setFontSize(12);
-    doc.text(`Motorista: ${caminhao.motorista || 'N/D'}`, 14, 30);
-    doc.text(`Marca: ${caminhao.Marca || 'N/D'}`, 14, 38);
-    doc.text(`Placa: ${caminhao.placa || 'N/D'}`, 14, 46);
-    doc.text(`Hora de Saída: ${caminhao.horaSaida || 'N/D'}`, 14, 54);
+    doc.text(`Total de Pontos: ${result.features.length}`, 14, 28);
 
-    doc.setFontSize(14);
-    doc.text('Pontos de Coleta:', 14, 66);
+    doc.autoTable({ startY:35, head:[['Nome','Endereço','Bairro','Resíduo','Dia']], body:rows, styles:{fontSize:10} });
+    doc.save("relatorio_coleta.pdf");
+  };
 
-    pontosSelecionados.forEach((p, i) => {
-      const minutos = Math.round((chegadaPorJob[p.id] || 0) / 60);
-      doc.text(`${i + 1}. ${p.nome} (Chegada prevista: ~${minutos} min)`, 14, 74 + i * 10);
-    });
-
-    const km = (distanciaTotalMetros / 1000).toFixed(2);
-    const tempoMin = Math.round(tempoTotalSegundos / 60);
-    doc.text(`\nDistância total: ${km} km`, 14, 74 + pontosSelecionados.length * 10 + 10);
-    doc.text(`Tempo total estimado: ${tempoMin} minutos`, 14, 74 + pontosSelecionados.length * 10 + 18);
-
-    doc.save('roteiro_entrega.pdf');
-  }
-
-  // Eventos botões
-  document.getElementById('btnCriarRota').addEventListener('click', () => {
-    const select = document.getElementById('selectPontos');
-    const selectedIds = Array.from(select.selectedOptions).map(opt => parseInt(opt.value));
-    const pontosSelecionadosInput = jobs.filter(j => selectedIds.includes(j.id));
-    if (pontosSelecionadosInput.length === 0) {
-      alert('Selecione pelo menos um ponto para criar a rota.');
-      return;
-    }
-    document.getElementById('infoStatus').innerHTML = 'Status: <em>Calculando rota...</em>';
-    calcularRotaMultiplosPontos(pontosSelecionadosInput).then(() => {
-      document.getElementById('infoStatus').innerHTML = 'Status: <em>Rota criada com sucesso.</em>';
-    });
-  });
-
-  document.getElementById('btnLimparRota').addEventListener('click', () => {
-    limparRota();
-  });
-
-  document.getElementById('btnGerarPDF').addEventListener('click', () => {
-    gerarPDF();
-  });
-
-  // Botão toggle sidebar
-  const sidebar = document.getElementById('sidebar');
-  const toggleBtn = document.getElementById('toggleBtn');
-  let sidebarAberto = true;
-
-  toggleBtn.addEventListener('click', () => {
-    sidebarAberto = !sidebarAberto;
-    if (sidebarAberto) {
-      sidebar.classList.remove('collapsed');
-      toggleBtn.textContent = '‹';
-      toggleBtn.style.left = '375px';
-    } else {
-      sidebar.classList.add('collapsed');
-      toggleBtn.textContent = '›';
-      toggleBtn.style.left = '15px';
-    }
-  });
-
+});
 </script>
 
 </body>
