@@ -16,13 +16,12 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Roboto, Helvetica, Arial, sans-serif; }
         
-        /* --- CORREÇÃO PARA CELULAR (DVH) --- */
         body { 
             background-color: #333; 
             display: flex; 
             justify-content: center; 
-            height: 100vh;
-            height: 100dvh; /* Altura dinâmica para mobile */
+            height: 100vh; 
+            height: 100dvh; /* Altura real mobile */
             overflow: hidden; 
             margin: 0;
         }
@@ -33,7 +32,7 @@
             background-color: var(--bg);
             display: flex; 
             flex-direction: column;
-            position: relative; /* Importante para o rodapé absoluto */
+            position: relative;
             overflow: hidden;
         }
 
@@ -57,14 +56,13 @@
         .header-title { font-size: 19px; font-weight: 600; }
         .back-btn { position: absolute; left: 16px; color: white; cursor: pointer; font-size: 20px; display: none; }
 
-        /* --- MAIN (Conteúdo) --- */
+        /* --- MAIN --- */
         main { 
             flex: 1; 
             display: flex; 
             flex-direction: column; 
             padding: 10px 12px; 
-            /* Espaço extra embaixo para o conteúdo não ficar atrás do menu */
-            padding-bottom: 70px; 
+            padding-bottom: 70px; /* Espaço para o menu fixo */
             overflow-y: auto; 
             position: relative;
         }
@@ -77,11 +75,10 @@
             text-align: center; color: #666; font-size: 13px; margin-bottom: 8px; flex-shrink: 0;
         }
 
-        /* --- GRID COMPACTO --- */
+        /* --- GRID --- */
         .grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
-            /* Ajuste automático para caber na tela visível */
             grid-template-rows: repeat(4, 1fr); 
             gap: 10px; 
             flex: 1; 
@@ -114,36 +111,14 @@
         .bg-brown { background-color: #E64A19; }
         .bg-dark { background-color: #455A64; }
 
-        /* --- MENU INFERIOR (CORRIGIDO / FIXADO) --- */
-        nav.bottom-nav {
-            background: white; 
-            border-top: 1px solid #ddd; 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center;
-            
-            /* TRUQUE PARA FIXAR NO FUNDO */
-            position: absolute; 
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60px; 
-            z-index: 999; /* Garante que fique por cima de tudo */
-            
-            /* Ajuste para iPhones sem botão home */
-            padding-bottom: env(safe-area-inset-bottom); 
-        }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #757575; font-size: 10px; cursor: pointer; width: 25%; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item i { font-size: 24px; margin-bottom: 2px; }
-
         /* --- MAPA E GPS --- */
         .map-container {
             width: 100%; height: 100%; position: relative;
             background-color: #e5e3df;
             display: flex; flex-direction: column;
         }
-        .map-frame { border:0; width:100%; height:100%; opacity: 0.7; }
+        /* Iframe ocupa tudo */
+        .map-frame { border:0; width:100%; height:100%; }
 
         .search-bar-container {
             position: absolute; top: 15px; left: 15px; right: 15px;
@@ -189,6 +164,22 @@
         }
         .form-input { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
         
+        /* --- MENU INFERIOR FIXO --- */
+        nav.bottom-nav {
+            background: white; 
+            border-top: 1px solid #ddd; 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center;
+            position: absolute; 
+            bottom: 0; left: 0; width: 100%;
+            height: 60px; 
+            z-index: 999;
+            padding-bottom: env(safe-area-inset-bottom); 
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #757575; font-size: 10px; cursor: pointer; width: 25%; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item i { font-size: 24px; margin-bottom: 2px; }
     </style>
 </head>
 <body>
@@ -236,13 +227,15 @@
 
             <div id="screen-routes" class="screen">
                 <div class="map-container">
-                    <iframe class="map-frame" src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d14631.5!2d-46.6!3d-23.55!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1spt-BR!2sbr!4v1600000000000!5m2!1spt-BR!2sbr" allowfullscreen="" loading="lazy"></iframe>
+                    <iframe id="mapa-frame" class="map-frame" src="https://maps.google.com/maps?q=-23.550520,-46.633308&z=12&output=embed" allowfullscreen="" loading="lazy"></iframe>
+                    
                     <div class="search-bar-container"><input type="text" placeholder="Endereço desejado"><i class="fas fa-search" style="color: #666;"></i></div>
                     <div class="toggle-container"><div class="toggle-btn toggle-active">ROTAS</div><div class="toggle-btn toggle-inactive">ECOPONTOS</div></div>
+                    
                     <div class="bottom-card-overlay">
-                        <p class="bottom-card-text">Deseja encontrar o ponto de coleta mais próximo?</p>
+                        <p class="bottom-card-text">Deseja ver sua localização atual no mapa?</p>
                         <button class="gps-button" onclick="buscarLocalizacaoReal()">
-                            <i class="fas fa-location-arrow"></i> USAR MEU GPS
+                            <i class="fas fa-location-arrow"></i> MINHA LOCALIZAÇÃO
                         </button>
                         <div id="gps-status" class="gps-status"></div>
                     </div>
@@ -332,25 +325,32 @@
             navigate('collect');
         }
 
-        /* FUNÇÃO GPS REAL */
+        /* --- LÓGICA DO GPS REAL NA MESMA TELA --- */
         function buscarLocalizacaoReal() {
             const statusDiv = document.getElementById("gps-status");
+            const mapaFrame = document.getElementById("mapa-frame");
+
             if (!navigator.geolocation) {
-                statusDiv.innerHTML = "GPS não suportado."; return;
+                statusDiv.innerHTML = "Geolocalização não suportada.";
+                return;
             }
-            statusDiv.innerHTML = "Aguardando GPS...";
+
+            statusDiv.innerHTML = "Buscando satélites...";
+
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const lat = position.coords.latitude;
                     const long = position.coords.longitude;
-                    statusDiv.innerHTML = "Localizado! Abrindo Maps...";
-                    setTimeout(() => {
-                        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${long}`, '_blank');
-                    }, 1000);
+                    
+                    statusDiv.innerHTML = "Localização atualizada!";
+                    
+                    // Atualiza o src do iframe para as novas coordenadas
+                    // z=15 é o nível de zoom
+                    mapaFrame.src = `https://maps.google.com/maps?q=${lat},${long}&z=15&output=embed`;
                 },
                 (error) => {
-                    statusDiv.innerHTML = "Erro ao obter localização.";
-                    console.error("Erro GPS:", error);
+                    statusDiv.innerHTML = "Erro ao obter localização. Ative o GPS.";
+                    console.error(error);
                 }
             );
         }
