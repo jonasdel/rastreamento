@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ReciclaLogo</title>
-    
+    <title>ASSCAVAG</title>
+        
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -12,13 +12,14 @@
 
     <style>
         :root {
-            --primary: #1b5e20; /* Verde mais escuro conforme imagem */
+            --primary: #2e7d32;
             --bg: #F5F5F5;
             --text: #333;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Roboto, Helvetica, Arial, sans-serif; }
         
+        /* --- LAYOUT BLINDADO PARA CELULAR --- */
         body { 
             background-color: #333; 
             display: flex; 
@@ -43,49 +44,54 @@
             #app-frame { max-width: 412px; }
         }
 
-        /* --- 1. CABEÇALHO --- */
+        /* --- CABEÇALHO FINO --- */
         header {
             background-color: var(--primary); 
             color: white; 
-            height: 56px; 
+            height: 48px; 
             display: flex;
             align-items: center; 
-            justify-content: space-between; /* Espalha itens */
-            padding: 0 16px;
+            justify-content: center;
             flex-shrink: 0; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             z-index: 10;
         }
         
-        .header-title { font-size: 20px; font-weight: 500; }
-        .header-icon { font-size: 20px; cursor: pointer; color: white; }
-        
-        /* --- 2. MAIN --- */
+        .header-title { font-size: 18px; font-weight: 600; }
+        .back-btn { position: absolute; left: 16px; color: white; cursor: pointer; font-size: 18px; display: none; }
+
+        /* --- ÁREA PRINCIPAL --- */
         main { 
             flex: 1; 
             display: flex; 
             flex-direction: column; 
-            padding: 10px 12px; 
-            padding-bottom: 70px; 
+            padding: 8px 10px; 
+            padding-bottom: 60px; 
             overflow-y: auto; 
             position: relative;
         }
-        main.no-padding { padding: 0; padding-bottom: 60px; }
+        
+        main.no-padding { padding: 8px 10px; padding-bottom: 60px; }
 
-        .screen { display: none; height: 100%; width: 100%; flex-direction: column; }
+        .screen { 
+            display: none; 
+            flex-direction: column; 
+            height: 100%; 
+            width: 100%; 
+        }
         .screen.active { display: flex; }
 
         .instruction-text {
-            text-align: center; color: #666; font-size: 13px; margin-bottom: 8px; flex-shrink: 0;
+            text-align: center; color: #666; font-size: 12px; margin-bottom: 5px; flex-shrink: 0;
         }
 
-        /* --- 3. GRID --- */
+        /* --- GRID MATEMÁTICO --- */
         .grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
             grid-template-rows: repeat(4, 1fr); 
-            gap: 10px; 
-            flex: 1; 
+            gap: 8px; 
+            height: 100%; 
             min-height: 0;
         }
         
@@ -96,191 +102,124 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center;
-            width: 100%; height: 100%; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            width: 100%; 
+            height: 100%; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15); 
             cursor: pointer; 
             position: relative;
         }
         .card:active { transform: scale(0.98); opacity: 0.9; }
-        .card i { font-size: 32px; margin-bottom: 5px; }
+        .card i { font-size: 28px; margin-bottom: 4px; }
         .card span { font-weight: bold; font-size: 13px; text-transform: uppercase; }
 
         /* Cores */
-        .bg-blue { background-color: #4285F4; } .bg-red { background-color: #EA4335; }
-        .bg-yellow { background-color: #FBBC04; } .bg-green { background-color: #34A853; }
-        .bg-gray { background-color: #5F6368; } .bg-orange { background-color: #FA7B17; }
-        .bg-brown { background-color: #D66C00; } .bg-dark { background-color: #3C4043; }
+        .bg-blue { background-color: #1976D2; } .bg-red { background-color: #D32F2F; }
+        .bg-yellow { background-color: #FBC02D; } .bg-green { background-color: #388E3C; }
+        .bg-gray { background-color: #616161; } .bg-orange { background-color: #F57C00; }
+        .bg-brown { background-color: #E64A19; } .bg-dark { background-color: #455A64; }
 
-        /* --- TELA ROTAS (DESIGN ESPECÍFICO) --- */
-        .map-container {
-            width: 100%; height: 100%; position: relative;
-            background-color: #e5e3df; /* Cor de fundo padrão Maps */
-            display: flex; flex-direction: column;
-        }
-        /* Imagem de fundo simulando o mapa (estático para visual clean) */
-        .map-bg {
-            width: 100%; height: 100%; object-fit: cover; opacity: 0.8;
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/ec/OpenStreetMap_im_Dortmunder_Westen.png');
-            background-size: cover;
-            background-position: center;
-        }
-
-        /* Barra de Busca Flutuante */
-        .search-bar-floating {
-            position: absolute; top: 15px; left: 15px; right: 15px;
-            background: white; border-radius: 2px; height: 48px;
-            display: flex; align-items: center; padding: 0 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 5;
-        }
-        .search-bar-floating input {
-            border: none; outline: none; flex: 1; font-size: 16px; color: #555;
-        }
-        .search-bar-floating i { color: #1b5e20; font-size: 18px; }
-
-        /* Botões Toggle */
-        .toggles-floating {
-            position: absolute; top: 75px; left: 15px;
-            display: flex; gap: 10px; z-index: 5;
-        }
-        .toggle-pill {
-            padding: 8px 20px; border-radius: 20px;
-            font-size: 13px; font-weight: bold; color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3); cursor: pointer;
-            text-transform: uppercase;
-        }
-        .toggle-active { background-color: #1b5e20; }
-        .toggle-inactive { background-color: #757575; }
-
-        /* Pino Central */
-        .map-pin-center {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: #FF5722; /* Laranja conforme imagem */
-            font-size: 45px; z-index: 4;
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
-        }
-
-        /* Cartão Inferior (Aviso) */
-        .bottom-card-warning {
-            position: absolute; bottom: 20px; left: 15px; right: 15px;
-            background: white; border-radius: 15px; padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 5;
-        }
-        .bottom-card-text {
-            font-size: 15px; color: #555; margin-bottom: 20px;
-            line-height: 1.4;
-        }
-        .btn-green-large {
-            background-color: #1b5e20; color: white; border: none;
-            width: 100%; padding: 14px; border-radius: 25px;
-            font-weight: bold; font-size: 14px; text-transform: uppercase;
-            cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        /* --- OUTROS --- */
-        .scrollable-content { overflow-y: auto; flex: 1; padding: 5px; }
-        .form-input { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
-        .btn-action { background-color: var(--primary); color: white; border: none; padding: 15px; border-radius: 8px; font-size: 16px; margin-top: auto; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; }
-        .preview-img { width: 100%; margin-top: 10px; border-radius: 8px; display: none; object-fit: cover; height: 200px; border: 2px dashed #ccc; }
-
-        /* Report Item */
+        /* --- UI ELEMENTS --- */
+        .scrollable-content { overflow-y: auto; flex: 1; padding: 2px; }
+        .btn-action { background-color: var(--primary); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 15px; margin-top: auto; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; }
+        .btn-action:disabled { background-color: #ccc; cursor: not-allowed; }
+        .form-input { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 15px; }
+        
+        /* --- RELATÓRIO --- */
         .report-item { background: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid var(--primary); display: flex; flex-direction: column; }
-        .report-header { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .report-img { width: 100%; height: 140px; object-fit: cover; border-radius: 6px; margin-top: 8px; }
+        .report-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 5px; }
+        .report-header strong { color: var(--primary); font-size: 15px; }
+        .report-details { display: flex; flex-direction: column; gap: 4px; }
+        .detail-row { display: flex; align-items: center; font-size: 13px; color: #555; }
+        .detail-row i { width: 20px; text-align: center; margin-right: 6px; color: #888; }
+        .report-img { width: 100%; height: 140px; object-fit: cover; border-radius: 6px; margin-top: 8px; border: 1px solid #eee; }
+
+        /* --- MAPA --- */
+        .map-container { width: 100%; height: 100%; position: relative; background-color: #e5e3df; display: flex; flex-direction: column; }
+        .map-frame { border:0; width:100%; height:100%; opacity: 0.7; }
+        .search-bar-container { position: absolute; top: 15px; left: 15px; right: 15px; background: white; border-radius: 4px; padding: 0 15px; height: 45px; display: flex; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 2; }
+        .search-bar-container input { border: none; outline: none; flex: 1; font-size: 15px; margin-left: 10px; }
+        .bottom-card-overlay { position: absolute; bottom: 20px; left: 15px; right: 15px; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); z-index: 2; text-align: center; }
+        .gps-button { background-color: #1976D2; color: white; text-align: center; padding: 12px; border-radius: 25px; font-weight: bold; font-size: 13px; text-transform: uppercase; width: 100%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
         /* --- RODAPÉ FIXO --- */
         nav.bottom-nav { 
             background: white; border-top: 1px solid #ddd; 
             display: flex; justify-content: space-around; align-items: center; 
             position: absolute; bottom: 0; left: 0; width: 100%; 
-            height: 60px; z-index: 999; padding-bottom: env(safe-area-inset-bottom); 
+            height: 55px; 
+            z-index: 999; padding-bottom: env(safe-area-inset-bottom); 
         }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #999; font-size: 10px; cursor: pointer; width: 25%; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
-        .nav-item i { font-size: 24px; margin-bottom: 2px; }
+        .nav-item i { font-size: 22px; margin-bottom: 2px; }
     </style>
 </head>
 <body>
 
     <div id="app-frame">
         <header>
-            <i class="fas fa-arrow-left header-icon" id="backBtn" onclick="goBack()" style="display:none;"></i>
-            <div class="header-title" id="headerTitle">ReciclaLogo</div>
-            <i class="fas fa-ellipsis-v header-icon"></i>
+            <i class="fas fa-arrow-left back-btn" id="backBtn" onclick="goBack()"></i>
+            <div class="header-title" id="headerTitle">ASSCAVAG</div>
         </header>
 
         <main id="main-content">
             <div id="screen-home" class="screen active">
                 <p class="instruction-text">Selecione para aprender e descartar</p>
                 <div class="grid">
-                    <div class="card bg-blue" onclick="openDetails('Papel', '#4285F4', 'fa-file-alt')"><i class="fas fa-file-alt"></i><span>Papel</span></div>
-                    <div class="card bg-red" onclick="openDetails('Plástico', '#EA4335', 'fa-wine-bottle')"><i class="fas fa-wine-bottle"></i><span>Plástico</span></div>
-                    <div class="card bg-yellow" onclick="openDetails('Metal', '#FBBC04', 'fa-beer')"><i class="fas fa-beer"></i><span>Metal</span></div>
-                    <div class="card bg-green" onclick="openDetails('Vidro', '#34A853', 'fa-wine-glass')"><i class="fas fa-wine-glass"></i><span>Vidro</span></div>
-                    <div class="card bg-gray" onclick="openDetails('Eletrônicos', '#5F6368', 'fa-desktop')"><i class="fas fa-desktop"></i><span>Eletrônicos</span></div>
-                    <div class="card bg-orange" onclick="openDetails('Pilhas', '#FA7B17', 'fa-battery-full')"><i class="fas fa-battery-full"></i><span>Pilhas</span></div>
-                    <div class="card bg-brown" onclick="openDetails('Óleo Vegetal', '#D66C00', 'fa-tint')"><i class="fas fa-tint"></i><span>Óleo</span></div>
-                    <div class="card bg-dark" onclick="openDetails('Lixo Comum', '#3C4043', 'fa-trash')"><i class="fas fa-trash"></i><span>Lixo Comum</span></div>
+                    <div class="card bg-blue" onclick="openDetails('Papel', '#1976D2', 'fa-file-alt')"><i class="fas fa-file-alt"></i><span>Papel</span></div>
+                    <div class="card bg-red" onclick="openDetails('Plástico', '#D32F2F', 'fa-wine-bottle')"><i class="fas fa-wine-bottle"></i><span>Plástico</span></div>
+                    <div class="card bg-yellow" onclick="openDetails('Metal', '#FBC02D', 'fa-beer')"><i class="fas fa-beer"></i><span>Metal</span></div>
+                    <div class="card bg-green" onclick="openDetails('Vidro', '#388E3C', 'fa-wine-glass')"><i class="fas fa-wine-glass"></i><span>Vidro</span></div>
+                    <div class="card bg-gray" onclick="openDetails('Eletrônicos', '#616161', 'fa-desktop')"><i class="fas fa-desktop"></i><span>Eletrônicos</span></div>
+                    <div class="card bg-orange" onclick="openDetails('Pilhas', '#F57C00', 'fa-battery-full')"><i class="fas fa-battery-full"></i><span>Pilhas</span></div>
+                    <div class="card bg-brown" onclick="openDetails('Óleo Vegetal', '#E64A19', 'fa-tint')"><i class="fas fa-tint"></i><span>Óleo</span></div>
+                    <div class="card bg-dark" onclick="openDetails('Lixo Comum', '#455A64', 'fa-trash')"><i class="fas fa-trash"></i><span>Lixo Comum</span></div>
                 </div>
             </div>
 
             <div id="screen-details" class="screen">
                 <div class="scrollable-content" id="detail-content"></div>
-                <button class="btn-action" style="background-color: #FA7B17;" onclick="openCollectScreen()">
+                <button class="btn-action" style="background-color: #F57C00;" onclick="openCollectScreen()">
                     <i class="fas fa-camera"></i> REGISTRAR DESCARTE
                 </button>
             </div>
             
             <div id="screen-collect" class="screen">
                 <div class="scrollable-content">
-                    <h2 style="color: #1b5e20; margin-bottom: 10px;">Novo Registro</h2>
+                    <h2 style="color: #2e7d32; margin-bottom: 10px;">Novo Registro</h2>
                     <p>Material: <strong id="collect-material-name">---</strong></p>
                     <input id="empresa" class="form-input" placeholder="Local / Empresa">
                     <input id="quantidade" type="number" class="form-input" placeholder="Quantidade (kg)">
+                    
                     <input id="camera" type="file" accept="image/*" capture="environment" style="display:none">
-                    <button class="btn-action" style="background:#666; margin-top:15px" onclick="document.getElementById('camera').click()"><i class="fas fa-camera"></i> FOTO</button>
-                    <img id="preview" class="preview-img">
+                    <button class="btn-action" style="background:#666; margin-top:15px" onclick="document.getElementById('camera').click()">
+                        <i class="fas fa-camera"></i> TIRAR FOTO
+                    </button>
+                    <img id="preview" style="width:100%; margin-top:10px; display:none; border-radius:8px; border: 2px dashed #ccc; min-height: 150px; object-fit: cover;">
                 </div>
                 <button class="btn-action" onclick="salvarColeta()">SALVAR NO BANCO</button>
             </div>
 
             <div id="screen-routes" class="screen">
                 <div class="map-container">
-                    <div class="map-bg"></div>
-                    <iframe id="mapa-frame" class="map-frame" style="display:none;" src="" allowfullscreen="" loading="lazy"></iframe>
-
-                    <div class="search-bar-floating">
-                        <input type="text" placeholder="Digite o endereço desejado">
-                        <i class="fas fa-search"></i>
-                    </div>
-
-                    <div class="toggles-floating">
-                        <div class="toggle-pill toggle-active">ROTAS</div>
-                        <div class="toggle-pill toggle-inactive">ECOPONTOS</div>
-                    </div>
-
-                    <i class="fas fa-map-marker-alt map-pin-center"></i>
-
-                    <div class="bottom-card-warning">
-                        <p class="bottom-card-text">
-                            Sua localização não está na rota de coleta ou próxima a um ecoponto.
-                        </p>
-                        <button class="btn-green-large" onclick="buscarLocalizacaoReal()">
-                            BUSCAR MEUS RECICLÁVEIS
-                        </button>
-                        <div id="gps-status" style="text-align:center; margin-top:5px; font-size:12px; color:#666"></div>
+                    <iframe id="mapa-frame" class="map-frame" src="https://maps.google.com/maps?q=-23.550520,-46.633308&z=12&output=embed" allowfullscreen="" loading="lazy"></iframe>
+                    <div class="search-bar-container"><input type="text" placeholder="Endereço desejado"><i class="fas fa-search" style="color: #666;"></i></div>
+                    <div class="bottom-card-overlay">
+                        <p style="text-align:center; margin-bottom:10px; font-size:14px; color:#444;">Ver localização no mapa?</p>
+                        <button class="gps-button" onclick="buscarLocalizacaoReal()"><i class="fas fa-location-arrow"></i> MINHA LOCALIZAÇÃO</button>
+                        <div id="gps-status" class="gps-status"></div>
                     </div>
                 </div>
             </div>
 
             <div id="screen-reports" class="screen">
-                <h2 style="color: #1b5e20;">Relatórios</h2>
+                <h2 style="color: #2e7d32;">Relatórios</h2>
                 <div style="background:white; padding:10px; border-radius:8px; margin:10px 0;"><canvas id="barChart" height="180"></canvas></div>
                 <div id="listaColetas" class="scrollable-content"><p style="text-align:center; color: #666;">Carregando...</p></div>
             </div>
 
             <div id="screen-contact" class="screen">
-                <h2 style="color: #1b5e20;">Contato</h2>
+                <h2 style="color: #2e7d32;">Contato</h2>
                 <input class="form-input" placeholder="Nome"><textarea class="form-input" style="height:120px" placeholder="Mensagem"></textarea>
                 <button class="btn-action" onclick="alert('Enviado!')">ENVIAR</button>
             </div>
@@ -299,21 +238,13 @@
         const SUPABASE_URL = 'https://zmshzpogevuzoxlhqfeb.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_AiuJM7hYrKqZRxn_JWYWgA_s_VdqLgt';
         
-        let supabaseClient;
-        try {
-            // Verifica se a biblioteca carregou
-            if (window.supabase) {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            } else {
-                console.warn("Biblioteca Supabase não carregou.");
-            }
-        } catch (e) {
-            console.error("Erro Supabase:", e);
-        }
+        // CORREÇÃO AQUI: Mudamos o nome da variável para não dar conflito
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let materialSelecionado = "";
         let fotoBase64 = "";
 
+        // DADOS LOCAIS (Para informação)
         const materialsData = {
             'Papel': {recyclable:['Jornais','Caixas'], nonRecyclable:['Papel Higiênico'], disposal:'Limpo e seco.'},
             'Plástico': {recyclable:['PET','Copos'], nonRecyclable:['Cabo panela'], disposal:'Lavar antes.'},
@@ -325,36 +256,26 @@
             'Lixo Comum': {recyclable:[], nonRecyclable:['Tudo'], disposal:'Aterro sanitário.'}
         };
 
+        // NAVEGAÇÃO
         function navigate(screenId) {
             document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById('screen-' + screenId).classList.add('active');
-            
             const navBtn = document.getElementById('nav-' + screenId);
             if(navBtn) navBtn.classList.add('active');
-
             const headerTitle = document.getElementById('headerTitle');
             const backBtn = document.getElementById('backBtn');
             const mainContent = document.getElementById('main-content');
             
-            // Layout Específico por Tela
-            if(screenId === 'home') {
-                mainContent.style.padding = "10px 12px";
-                mainContent.style.paddingBottom = "60px";
-                headerTitle.innerText = 'ReciclaLogo';
-                backBtn.style.display = 'none';
-            } else if (screenId === 'routes') {
-                mainContent.style.padding = "0"; // Mapa ocupa tudo
-                mainContent.style.paddingBottom = "60px";
-                headerTitle.innerText = 'Rotas e Ecopontos';
-                backBtn.style.display = 'block';
-            } else {
-                mainContent.style.padding = "10px 12px";
-                mainContent.style.paddingBottom = "60px";
-                headerTitle.innerText = 'ReciclaLogo';
-                backBtn.style.display = 'block';
-                
-                const titles = { reports: 'Relatórios', contact: 'Contato', details: 'Detalhes', collect: 'Registro' };
+            // Ajuste de padding para home/rotas ficarem colados na borda
+            if(screenId === 'home' || screenId === 'routes') mainContent.style.padding = "0";
+            else mainContent.style.padding = "10px 12px";
+            mainContent.style.paddingBottom = "60px";
+
+            if(screenId === 'home') { headerTitle.innerText = 'ASSCAVAG'; backBtn.style.display = 'none'; } 
+            else { 
+                backBtn.style.display = 'block'; 
+                const titles = { routes: 'Rotas', reports: 'Relatórios', contact: 'Contato', details: 'Detalhes', collect: 'Registro' };
                 if(titles[screenId]) headerTitle.innerText = titles[screenId];
             }
         }
@@ -369,9 +290,9 @@
                     <i class="${icon} fa-3x"></i><h2 style="margin-top:10px">${type}</h2>
                 </div>
                 <div style="background:white; padding:15px; border-radius:12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <h3 style="color:${color}; border-bottom:1px solid #eee; padding-bottom:5px">✅ O que pode</h3><p style="margin:5px 0 10px">${data.recyclable.join(', ') || 'Nenhum'}</p>
-                    <h3 style="color:#D32F2F; border-bottom:1px solid #eee; padding-bottom:5px">❌ O que não pode</h3><p style="margin:5px 0 10px">${data.nonRecyclable.join(', ')}</p>
-                    <h3 style="margin-top:10px; border-bottom:1px solid #eee; padding-bottom:5px">ℹ️ Como descartar</h3><p style="margin:5px 0">${data.disposal}</p>
+                    <h3 style="color:${color}; border-bottom:1px solid #eee; font-size:15px">✅ O que pode</h3><p style="margin:5px 0 10px; font-size:14px">${data.recyclable.join(', ') || 'Nenhum'}</p>
+                    <h3 style="color:#D32F2F; border-bottom:1px solid #eee; font-size:15px">❌ O que não pode</h3><p style="margin:5px 0 10px; font-size:14px">${data.nonRecyclable.join(', ')}</p>
+                    <h3 style="margin-top:10px; border-bottom:1px solid #eee; font-size:15px">ℹ️ Descarte</h3><p style="margin:5px 0; font-size:14px">${data.disposal}</p>
                 </div>
             `;
             navigate('details');
@@ -382,52 +303,46 @@
             document.getElementById("empresa").value = "";
             document.getElementById("quantidade").value = "";
             document.getElementById("preview").style.display = 'none';
+            document.getElementById("preview").src = "";
             fotoBase64 = "";
             navigate('collect');
         }
 
-        // GPS REAL
         function buscarLocalizacaoReal() {
             const statusDiv = document.getElementById("gps-status");
-            const mapBg = document.querySelector(".map-bg");
-            const mapFrame = document.getElementById("mapa-frame");
-
+            const mapaFrame = document.getElementById("mapa-frame");
             if (!navigator.geolocation) { statusDiv.innerHTML = "GPS não suportado."; return; }
-            statusDiv.innerHTML = "Buscando localização...";
-            
+            statusDiv.innerHTML = "Buscando satélites...";
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const lat = position.coords.latitude;
                     const long = position.coords.longitude;
                     statusDiv.innerHTML = "Localização encontrada!";
-                    
-                    // Troca o fundo estático pelo mapa real interativo
-                    mapBg.style.display = 'none';
-                    mapFrame.style.display = 'block';
-                    mapFrame.src = `https://maps.google.com/maps?q=${lat},${long}&z=15&output=embed`;
+                    mapaFrame.src = `https://maps.google.com/maps?q=${lat},${long}&z=15&output=embed`;
                 },
-                (error) => { statusDiv.innerHTML = "Erro ao acessar GPS. Verifique permissões."; }
+                (error) => { statusDiv.innerHTML = "Erro ao acessar GPS."; }
             );
         }
 
         document.getElementById("camera").addEventListener("change", function(e){
             const file = e.target.files[0];
             if(!file) return;
-            if(file.size > 2000000) { alert("Foto muito grande. Use uma menor."); return; }
+            if(file.size > 3000000) { alert("Foto muito grande. Use uma menor."); return; }
             const reader = new FileReader();
             reader.onload = function(){
                 fotoBase64 = reader.result;
                 const img = document.getElementById("preview");
-                img.src = fotoBase64; img.style.display = 'block';
+                img.src = fotoBase64; 
+                img.style.display = 'block';
             };
             reader.readAsDataURL(file);
         });
 
-        // SALVAR
+        // --- SALVAR NO SUPABASE ---
         async function salvarColeta(){
-            if (!supabaseClient) { alert("Erro de conexão com o banco."); return; }
             const empresa = document.getElementById("empresa").value;
             const quantidade = document.getElementById("quantidade").value;
+            
             if(!empresa || !quantidade){ alert("Preencha todos os campos!"); return; }
 
             const btn = document.querySelector('#screen-collect button:last-child');
@@ -435,6 +350,8 @@
             btn.disabled = true;
 
             try {
+                // CORREÇÃO: Usando 'quantidade' e 'status' conforme sua imagem do banco
+                // E formatando data apenas como YYYY-MM-DD para aceitar no tipo 'date'
                 const { error } = await supabaseClient
                     .from('coletas')
                     .insert({ 
@@ -443,11 +360,13 @@
                         quantidade: parseFloat(quantidade), 
                         foto_base64: fotoBase64,
                         status: 'pendente', 
-                        data_coleta: new Date().toISOString().split('T')[0]
+                        data_coleta: new Date().toISOString().split('T')[0] // Data formato Date
                     });
 
                 if (error) {
-                    if(error.message.includes("row-level security")) throw new Error("Erro de Permissão: Libere o RLS no Supabase.");
+                    if(error.message.includes("row-level security")) {
+                        throw new Error("ERRO DE PERMISSÃO: Rode 'ALTER TABLE coletas DISABLE ROW LEVEL SECURITY;' no Supabase.");
+                    }
                     throw error;
                 }
 
@@ -456,21 +375,21 @@
                 carregarPainel();
 
             } catch (error) {
-                console.error("Erro:", error);
-                alert("Erro: " + error.message);
+                console.error("Erro completo:", error);
+                alert("Erro ao salvar: " + error.message);
             } finally {
                 btn.innerText = 'SALVAR NO BANCO';
                 btn.disabled = false;
             }
         }
 
-        // LER
+        // --- LER DO SUPABASE ---
         async function carregarPainel(){
-             if (!supabaseClient) return;
              const container = document.getElementById("listaColetas");
-             container.innerHTML = '<p style="text-align:center; color:#666;">Atualizando...</p>';
+             container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">Atualizando...</p>';
              
              try {
+                 // Usa o cliente correto
                  const { data: dbColetas, error } = await supabaseClient
                     .from('coletas')
                     .select('*')
@@ -480,7 +399,7 @@
 
                  container.innerHTML = "";
                  if (!dbColetas || dbColetas.length === 0) {
-                     container.innerHTML = '<p style="text-align:center; color:#666;">Nenhum registro.</p>';
+                     container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">Nenhum registro.</p>';
                      return;
                  }
 
@@ -498,9 +417,9 @@
                                 <strong>${item.material}</strong>
                                 <small>ID: ${item.id}</small>
                             </div>
-                            <div style="display:flex; justify-content:space-between; font-size:14px; color:#444;">
-                                <span><i class="fas fa-weight-hanging"></i> <strong>${qtdNum} kg</strong></span>
-                                <span><i class="fas fa-user"></i> ${item.empresa}</span>
+                            <div class="report-details">
+                                <div class="detail-row"><i class="fas fa-weight-hanging"></i> <strong>${qtdNum} kg</strong></div>
+                                <div class="detail-row"><i class="fas fa-user"></i> <span>${item.empresa}</span></div>
                             </div>
                             ${imgHtml}
                         </div>
@@ -508,6 +427,7 @@
                      container.innerHTML += cardHtml;
                  });
 
+                 // Gráfico
                  if(window.myChartInstance) window.myChartInstance.destroy();
                  const ctx = document.getElementById('barChart');
                  window.myChartInstance = new Chart(ctx, {
@@ -517,7 +437,7 @@
                         datasets: [{ 
                             label: 'Kg Coletados', 
                             data: [totais['Papel'], totais['Vidro'], totais['Plástico']], 
-                            backgroundColor: ['#4285F4', '#34A853', '#EA4335'] 
+                            backgroundColor: ['#1976D2', '#388E3C', '#D32F2F'] 
                         }] 
                     },
                     options: { responsive: true, plugins: { legend: { display: false } } }
