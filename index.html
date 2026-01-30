@@ -16,12 +16,13 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Roboto, Helvetica, Arial, sans-serif; }
         
+        /* CORREÇÃO PARA CELULAR (DVH) */
         body { 
             background-color: #333; 
             display: flex; 
             justify-content: center; 
-            height: 100vh; 
-            height: 100dvh; /* Altura real mobile */
+            height: 100vh;
+            height: 100dvh; 
             overflow: hidden; 
             margin: 0;
         }
@@ -62,7 +63,7 @@
             display: flex; 
             flex-direction: column; 
             padding: 10px 12px; 
-            padding-bottom: 70px; /* Espaço para o menu fixo */
+            padding-bottom: 70px; /* Espaço para menu */
             overflow-y: auto; 
             position: relative;
         }
@@ -111,14 +112,38 @@
         .bg-brown { background-color: #E64A19; }
         .bg-dark { background-color: #455A64; }
 
+        /* --- ESTILOS DO RELATÓRIO --- */
+        .report-item {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+        }
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .report-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 8px;
+            border: 1px solid #eee;
+        }
+
         /* --- MAPA E GPS --- */
         .map-container {
             width: 100%; height: 100%; position: relative;
             background-color: #e5e3df;
             display: flex; flex-direction: column;
         }
-        /* Iframe ocupa tudo */
-        .map-frame { border:0; width:100%; height:100%; }
+        .map-frame { border:0; width:100%; height:100%; opacity: 0.7; }
 
         .search-bar-container {
             position: absolute; top: 15px; left: 15px; right: 15px;
@@ -164,15 +189,14 @@
         }
         .form-input { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
         
-        /* --- MENU INFERIOR FIXO --- */
+        /* --- MENU FIXO --- */
         nav.bottom-nav {
             background: white; 
             border-top: 1px solid #ddd; 
             display: flex; 
             justify-content: space-around; 
             align-items: center;
-            position: absolute; 
-            bottom: 0; left: 0; width: 100%;
+            position: absolute; bottom: 0; left: 0; width: 100%;
             height: 60px; 
             z-index: 999;
             padding-bottom: env(safe-area-inset-bottom); 
@@ -218,9 +242,14 @@
                     <p>Material: <strong id="collect-material-name">---</strong></p>
                     <input id="empresa" class="form-input" placeholder="Local / Empresa">
                     <input id="quantidade" type="number" class="form-input" placeholder="Quantidade (kg)">
+                    
                     <input id="camera" type="file" accept="image/*" capture="environment" style="display:none">
-                    <button class="btn-action" style="background:#666; margin-top:15px" onclick="document.getElementById('camera').click()"><i class="fas fa-camera"></i> FOTO</button>
-                    <img id="preview" style="width:100%; margin-top:10px; display:none; border-radius:8px;">
+                    
+                    <button class="btn-action" style="background:#666; margin-top:15px" onclick="document.getElementById('camera').click()">
+                        <i class="fas fa-camera"></i> TIRAR FOTO
+                    </button>
+                    
+                    <img id="preview" style="width:100%; margin-top:10px; display:none; border-radius:8px; border: 2px dashed #ccc; min-height: 150px; object-fit: cover;">
                 </div>
                 <button class="btn-action" onclick="salvarColeta()">SALVAR</button>
             </div>
@@ -228,10 +257,8 @@
             <div id="screen-routes" class="screen">
                 <div class="map-container">
                     <iframe id="mapa-frame" class="map-frame" src="https://maps.google.com/maps?q=-23.550520,-46.633308&z=12&output=embed" allowfullscreen="" loading="lazy"></iframe>
-                    
                     <div class="search-bar-container"><input type="text" placeholder="Endereço desejado"><i class="fas fa-search" style="color: #666;"></i></div>
                     <div class="toggle-container"><div class="toggle-btn toggle-active">ROTAS</div><div class="toggle-btn toggle-inactive">ECOPONTOS</div></div>
-                    
                     <div class="bottom-card-overlay">
                         <p class="bottom-card-text">Deseja ver sua localização atual no mapa?</p>
                         <button class="gps-button" onclick="buscarLocalizacaoReal()">
@@ -245,7 +272,10 @@
             <div id="screen-reports" class="screen">
                 <h2 style="color: var(--primary);">Relatórios</h2>
                 <div style="background:white; padding:10px; border-radius:8px; margin:15px 0;"><canvas id="barChart"></canvas></div>
-                <div id="listaColetas" class="scrollable-content"><p style="text-align:center">Carregando...</p></div>
+                
+                <div id="listaColetas" class="scrollable-content">
+                    <p style="text-align:center; color: #666; margin-top: 20px;">Nenhum registro ainda.</p>
+                </div>
             </div>
 
             <div id="screen-contact" class="screen">
@@ -264,9 +294,10 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://zmshzpogevuzoxlhqfeb.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_AiuJM7hYrKqZRxn_JWYWgA_s_VdqLgt"; 
-        let materialSelecionado = "", fotoBase64 = "";
+        // LISTA GLOBAL PARA GUARDAR AS COLETAS (Memória temporária)
+        let globalColetas = [];
+        let materialSelecionado = "";
+        let fotoBase64 = "";
 
         const materialsData = {
             'Papel': {recyclable:['Jornais','Caixas'], nonRecyclable:['Papel Higiênico'], disposal:'Limpo e seco.'},
@@ -322,74 +353,113 @@
 
         function openCollectScreen() {
             document.getElementById('collect-material-name').innerText = materialSelecionado;
+            // Limpar campos
+            document.getElementById("empresa").value = "";
+            document.getElementById("quantidade").value = "";
+            document.getElementById("preview").style.display = 'none';
+            document.getElementById("preview").src = "";
+            fotoBase64 = ""; // Resetar foto
             navigate('collect');
         }
 
-        /* --- LÓGICA DO GPS REAL NA MESMA TELA --- */
+        /* GPS REAL */
         function buscarLocalizacaoReal() {
             const statusDiv = document.getElementById("gps-status");
             const mapaFrame = document.getElementById("mapa-frame");
-
-            if (!navigator.geolocation) {
-                statusDiv.innerHTML = "Geolocalização não suportada.";
-                return;
-            }
-
+            if (!navigator.geolocation) { statusDiv.innerHTML = "GPS não suportado."; return; }
             statusDiv.innerHTML = "Buscando satélites...";
-
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const lat = position.coords.latitude;
                     const long = position.coords.longitude;
-                    
                     statusDiv.innerHTML = "Localização atualizada!";
-                    
-                    // Atualiza o src do iframe para as novas coordenadas
-                    // z=15 é o nível de zoom
                     mapaFrame.src = `https://maps.google.com/maps?q=${lat},${long}&z=15&output=embed`;
                 },
-                (error) => {
-                    statusDiv.innerHTML = "Erro ao obter localização. Ative o GPS.";
-                    console.error(error);
-                }
+                (error) => { statusDiv.innerHTML = "Erro GPS."; console.error(error); }
             );
         }
 
+        // --- CÂMERA E PREVIEW ---
         document.getElementById("camera").addEventListener("change", function(e){
             const file = e.target.files[0];
             if(!file) return;
             const reader = new FileReader();
             reader.onload = function(){
-                fotoBase64 = reader.result;
+                fotoBase64 = reader.result; // Guarda a foto em base64
                 const img = document.getElementById("preview");
-                img.src = fotoBase64; img.style.display = 'block';
+                img.src = fotoBase64; 
+                img.style.display = 'block';
             };
             reader.readAsDataURL(file);
         });
 
-        async function salvarColeta(){
+        // --- SALVAR NA LISTA (MEMÓRIA) ---
+        function salvarColeta(){
             const empresa = document.getElementById("empresa").value;
             const quantidade = document.getElementById("quantidade").value;
+            
             if(!empresa || !quantidade){ alert("Preencha todos os campos!"); return; }
+
+            // Cria o objeto da coleta
+            const novaColeta = {
+                material: materialSelecionado,
+                empresa: empresa,
+                qtd: quantidade,
+                foto: fotoBase64, // Aqui vai a foto!
+                data: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
+            };
+
+            // Adiciona no início da lista global
+            globalColetas.unshift(novaColeta);
+
             const btn = document.querySelector('#screen-collect button:last-child');
             btn.innerHTML = 'Salvando...';
+            
             setTimeout(() => {
-                alert("Coleta registrada com sucesso!"); 
+                alert("Coleta registrada!"); 
                 btn.innerHTML = 'SALVAR';
                 navigate('reports'); 
-                carregarPainel();
-            }, 1000);
+                carregarPainel(); // Atualiza a tela de relatórios
+            }, 800);
         }
 
+        // --- CARREGAR RELATÓRIOS (COM FOTO) ---
         function carregarPainel(){
-             document.getElementById("listaColetas").innerHTML = "<div style='background:white; padding:10px; border-radius:8px; border-left:4px solid green; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1)'><strong>Papel</strong><br>5kg - Empresa Local<br><small style='color:#888'>Hoje, 14:30</small></div>";
-             setTimeout(() => {
-                new Chart(document.getElementById('barChart'), {
-                    type: 'bar',
-                    data: { labels: ['Papel','Vidro', 'Plástico'], datasets: [{ label: 'Kg coletados', data: [15, 8, 22], backgroundColor: ['#1976D2', '#388E3C', '#D32F2F'] }] },
-                    options: { responsive: true, plugins: { legend: { display: false } } }
-                });
-             }, 100);
+             const container = document.getElementById("listaColetas");
+             container.innerHTML = ""; // Limpa a lista
+
+             if (globalColetas.length === 0) {
+                 container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">Nenhum registro ainda.</p>';
+                 return;
+             }
+
+             // Percorre a lista e cria os cards
+             globalColetas.forEach(item => {
+                 // Verifica se tem foto para mostrar
+                 const imgHtml = item.foto ? `<img src="${item.foto}" class="report-img">` : '';
+
+                 const cardHtml = `
+                    <div class="report-item">
+                        <div class="report-header">
+                            <strong>${item.material}</strong>
+                            <small style="color:#666">${item.data}</small>
+                        </div>
+                        <div style="font-size:14px; color:#444">
+                            ${item.qtd}kg • ${item.empresa}
+                        </div>
+                        ${imgHtml}
+                    </div>
+                 `;
+                 container.innerHTML += cardHtml;
+             });
+
+             // Atualiza Gráfico (Simples)
+             // (Em um app real, somaria os valores de 'globalColetas')
+             new Chart(document.getElementById('barChart'), {
+                type: 'bar',
+                data: { labels: ['Papel','Vidro', 'Plástico'], datasets: [{ label: 'Kg', data: [15, 8, 22], backgroundColor: ['#1976D2', '#388E3C', '#D32F2F'] }] },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+             });
         }
     </script>
 </body>
