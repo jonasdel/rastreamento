@@ -1,212 +1,412 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Coleta Seletiva</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ReciclaLogo - App Completo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#2e7d32">
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --bg: #F3F4F6;
+            --text: #1F2937;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
 
-<style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
-  background:#f4f6f8;
-}
-header{
-  height:56px;
-  background:#2e7d32;
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:20px;
-  font-weight:600;
-}
-main{padding:16px}
-.tela{display:none}
-.tela.ativa{display:block}
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-}
-.botao-material{
-  height:120px;
-  border:none;
-  border-radius:22px;
-  font-size:22px;
-  font-weight:700;
-  color:#fff;
-}
-.papel{background:#1e88e5}
-.metal{background:#fdd835;color:#000}
-.plastico{background:#e53935}
-.vidro{background:#43a047}
-input{
-  width:100%;
-  padding:14px;
-  margin-top:12px;
-  font-size:16px;
-  border-radius:14px;
-  border:1px solid #ccc;
-}
-.botao-principal{
-  margin-top:16px;
-  width:100%;
-  height:56px;
-  background:#2e7d32;
-  color:#fff;
-  font-size:18px;
-  border:none;
-  border-radius:18px;
-  font-weight:600;
-}
-img{
-  width:100%;
-  margin-top:12px;
-  border-radius:16px;
-}
-</style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        
+        body { background-color: #e5e5e5; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+
+        #app-frame {
+            width: 100%; max-width: 400px; background-color: var(--bg); height: 100%;
+            position: relative; display: flex; flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2); overflow: hidden;
+        }
+
+        header {
+            background-color: var(--primary); color: white; padding: 20px; text-align: center;
+            padding-top: 50px; flex-shrink: 0; position: relative; z-index: 10;
+        }
+        
+        .header-title { font-size: 20px; font-weight: bold; }
+        .back-btn { position: absolute; left: 15px; top: 50px; color: white; cursor: pointer; font-size: 20px; display: none; }
+
+        main { flex: 1; overflow-y: auto; padding: 20px; position: relative; }
+        /* Remove padding for map screen to fill area */
+        main.no-padding { padding: 0; overflow: hidden; }
+
+        .screen { display: none; animation: fadeIn 0.3s ease; height: 100%; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* GRID HOME */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card {
+            border-radius: 12px; padding: 15px; color: white;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 110px; box-shadow: var(--shadow); cursor: pointer; text-align: center;
+        }
+        .card:active { transform: scale(0.98); }
+        .card i { font-size: 28px; margin-bottom: 8px; }
+        .card span { font-weight: bold; font-size: 14px; }
+
+        /* CORES */
+        .bg-blue { background-color: #3B82F6; }
+        .bg-red { background-color: #EF4444; }
+        .bg-yellow { background-color: #EAB308; }
+        .bg-green { background-color: #22C55E; }
+        .bg-gray { background-color: #6B7280; }
+        .bg-orange { background-color: #F97316; }
+        .bg-brown { background-color: #D97706; }
+        .bg-dark { background-color: #374151; }
+
+        /* ESTILOS DA TELA DE ROTAS (Idêntico ao Print) */
+        .map-container {
+            width: 100%; height: 100%; position: relative;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/ec/OpenStreetMap_im_Dortmunder_Westen.png'); /* Imagem de Mapa Genérica */
+            background-size: cover; background-position: center;
+        }
+        
+        .search-bar-container {
+            position: absolute; top: 20px; left: 20px; right: 20px;
+            background: white; border-radius: 4px; padding: 0 15px; height: 45px;
+            display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2;
+        }
+        .search-bar-container input { border: none; outline: none; flex: 1; font-size: 14px; margin-left: 10px; }
+        
+        .toggle-container {
+            position: absolute; top: 80px; left: 20px; right: 20px;
+            display: flex; gap: 10px; z-index: 2;
+        }
+        .toggle-btn {
+            flex: 1; padding: 10px; border-radius: 20px; text-align: center;
+            font-weight: bold; font-size: 13px; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        .toggle-active { background-color: #166534; } /* Verde Escuro */
+        .toggle-inactive { background-color: #888; } /* Cinza */
+
+        .map-pin {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #F97316; font-size: 40px; z-index: 1; text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .bottom-card-overlay {
+            position: absolute; bottom: 20px; left: 15px; right: 15px;
+            background: white; border-radius: 15px; padding: 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 2;
+        }
+        .bottom-card-text { font-size: 14px; color: #555; margin-bottom: 15px; line-height: 1.4; }
+        .bottom-card-btn {
+            background-color: #166534; color: white; text-align: center;
+            padding: 12px; border-radius: 25px; font-weight: bold; font-size: 14px;
+            text-transform: uppercase; width: 100%; border: none; cursor: pointer;
+        }
+
+        /* OUTROS ESTILOS */
+        .btn-action {
+            background-color: var(--primary); color: white; border: none; padding: 14px;
+            border-radius: 12px; font-size: 16px; margin-top: 15px; width: 100%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600;
+        }
+        .form-input { width: 100%; padding: 14px; margin-top: 10px; border-radius: 12px; border: 1px solid #ccc; }
+        .preview-img { width: 100%; margin-top: 12px; border-radius: 16px; display: none; object-fit: cover; height: 200px; border: 2px dashed #ccc; }
+        
+        .coleta-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: var(--shadow); border-left: 5px solid var(--primary); }
+        .coleta-img-mini { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-top: 8px; }
+        .info-box { background:#fff; padding:15px; border-radius:8px; font-size: 14px; line-height: 1.5; color: #444; }
+        .list-item { padding: 6px 0; border-bottom: 1px solid #ddd; color: #555; font-size: 14px; display: flex; align-items: center; }
+        .section-title { font-weight: bold; color: var(--text); margin-top: 15px; margin-bottom: 8px; font-size: 16px; }
+        .detail-header { border-radius: 12px; padding: 25px; color: white; text-align: center; margin-bottom: 20px; }
+
+        nav.bottom-nav {
+            background: white; border-top: 1px solid #e5e5e5; display: flex; justify-content: space-around; padding: 10px 0; flex-shrink: 0; z-index: 10;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #9CA3AF; font-size: 11px; cursor: pointer; width: 20%; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-item i { font-size: 18px; margin-bottom: 4px; }
+    </style>
 </head>
-
 <body>
 
-<header>♻️ Coleta Seletiva</header>
+    <div id="app-frame">
+        <header>
+            <i class="fas fa-arrow-left back-btn" id="backBtn" onclick="goBack()"></i>
+            <div class="header-title" id="headerTitle">ReciclaLogo</div>
+        </header>
 
-<main>
+        <main id="main-content">
+            <div id="screen-home" class="screen active">
+                <p style="text-align:center; color:#666; margin-bottom:15px; font-size:14px;">Selecione para aprender e descartar</p>
+                <div class="grid">
+                    <div class="card bg-blue" onclick="openDetails('Papel', '#3B82F6', 'fa-newspaper')"><i class="fas fa-newspaper"></i><span>Papel</span></div>
+                    <div class="card bg-red" onclick="openDetails('Plástico', '#EF4444', 'fa-wine-bottle')"><i class="fas fa-wine-bottle"></i><span>Plástico</span></div>
+                    <div class="card bg-yellow" onclick="openDetails('Metal', '#EAB308', 'fa-hammer')"><i class="fas fa-hammer"></i><span>Metal</span></div>
+                    <div class="card bg-green" onclick="openDetails('Vidro', '#22C55E', 'fa-wine-glass')"><i class="fas fa-wine-glass"></i><span>Vidro</span></div>
+                    <div class="card bg-gray" onclick="openDetails('Eletrônicos', '#6B7280', 'fa-plug')"><i class="fas fa-plug"></i><span>Eletrônicos</span></div>
+                    <div class="card bg-orange" onclick="openDetails('Pilhas', '#F97316', 'fa-battery-half')"><i class="fas fa-battery-half"></i><span>Pilhas</span></div>
+                    <div class="card bg-brown" onclick="openDetails('Óleo Vegetal', '#D97706', 'fa-tint')"><i class="fas fa-tint"></i><span>Óleo</span></div>
+                    <div class="card bg-dark" onclick="openDetails('Não Reciclável', '#374151', 'fa-trash')"><i class="fas fa-trash"></i><span>Lixo Comum</span></div>
+                </div>
+            </div>
 
-<!-- TELA 1 -->
-<div id="telaMaterial" class="tela ativa">
-  <h3>Selecione o material</h3>
-  <div class="grid">
-    <button class="botao-material papel" onclick="selecionarMaterial('Papel')">Papel</button>
-    <button class="botao-material metal" onclick="selecionarMaterial('Metal')">Metal</button>
-    <button class="botao-material plastico" onclick="selecionarMaterial('Plástico')">Plástico</button>
-    <button class="botao-material vidro" onclick="selecionarMaterial('Vidro')">Vidro</button>
-  </div>
-</div>
+            <div id="screen-details" class="screen">
+                <div id="detail-content"></div>
+                <button class="btn-action" style="background-color: #F59E0B;" onclick="openCollectScreen()"><i class="fas fa-camera"></i> Registrar Descarte</button>
+            </div>
 
-<!-- TELA 2 -->
-<div id="telaFoto" class="tela">
-  <h3 id="tituloMaterial"></h3>
+            <div id="screen-collect" class="screen">
+                <h2 style="color: var(--primary);">Novo Registro</h2>
+                <p>Categoria: <strong id="collect-material-name">---</strong></p>
+                <input id="empresa" class="form-input" placeholder="Local / Empresa">
+                <input id="quantidade" type="number" class="form-input" placeholder="Quantidade estimada (kg)">
+                <input id="camera" type="file" accept="image/*" capture="environment" style="display:none">
+                <button class="btn-action" style="background:#666" onclick="document.getElementById('camera').click()"><i class="fas fa-camera"></i> Tirar Foto</button>
+                <img id="preview" class="preview-img">
+                <button class="btn-action" onclick="salvarColeta()"><i class="fas fa-check"></i> Salvar no Sistema</button>
+            </div>
 
-  <input id="empresa" placeholder="Empresa / Estabelecimento">
-  <input id="quantidade" type="number" placeholder="Quantidade (kg)">
+            <div id="screen-routes" class="screen">
+                <div class="map-container">
+                    
+                    <div class="search-bar-container">
+                        <input type="text" placeholder="Digite o endereço desejado">
+                        <i class="fas fa-search" style="color: #666;"></i>
+                    </div>
 
-  <input
-    id="camera"
-    type="file"
-    accept="image/*"
-    capture="environment"
-    style="display:none">
+                    <div class="toggle-container">
+                        <div class="toggle-btn toggle-active">ROTAS</div>
+                        <div class="toggle-btn toggle-inactive">ECOPONTOS</div>
+                    </div>
 
-  <button class="botao-principal" onclick="abrirCamera()">📷 Tirar Foto</button>
+                    <i class="fas fa-map-marker-alt map-pin"></i>
 
-  <img id="preview">
+                    <div class="bottom-card-overlay">
+                        <p class="bottom-card-text">
+                            Sua localização não está na rota de coleta ou próxima a um ecoponto.
+                        </p>
+                        <button class="bottom-card-btn" onclick="alert('Buscando rotas alternativas...')">
+                            BUSCAR MEUS RECICLÁVEIS
+                        </button>
+                    </div>
 
-  <button class="botao-principal" onclick="salvarColeta()">Salvar Coleta</button>
-</div>
+                </div>
+            </div>
 
-<!-- TELA 3 -->
-<div id="telaSucesso" class="tela">
-  <h2>✅ Coleta registrada</h2>
-  <button class="botao-principal" onclick="novaColeta()">Nova coleta</button>
-</div>
+            <div id="screen-reports" class="screen">
+                <h2 style="color: var(--primary);">Painel de Impacto</h2>
+                <div style="background:white; padding:10px; border-radius:12px; margin: 15px 0;">
+                    <canvas id="barChart" style="max-height: 150px;"></canvas>
+                </div>
+                <h3 style="font-size:16px; margin-bottom:10px;">Registros Recentes</h3>
+                <div id="listaColetas"><p style="text-align:center">Carregando...</p></div>
+            </div>
 
-</main>
+            <div id="screen-contact" class="screen">
+                <h2 style="color: var(--primary);">Fale Conosco</h2>
+                <div class="info-box" style="margin-top:15px; box-shadow: var(--shadow);">
+                    <label style="font-weight:bold;">Sua Mensagem</label>
+                    <input class="form-input" placeholder="Seu nome">
+                    <textarea class="form-input" style="height:80px; resize:none" placeholder="Como podemos ajudar?"></textarea>
+                    <button class="btn-action" onclick="alert('Mensagem enviada!')">Enviar</button>
+                </div>
+                <div style="text-align:center; margin-top:20px; font-size:12px; color:#888;">
+                    <p><strong>ReciclaLogo Associação</strong></p>
+                    <p>suporte@reciclalogo.com</p>
+                </div>
+            </div>
+        </main>
 
-<script>
-/* 🔑 DADOS DO SUPABASE */
-const SUPABASE_URL = "https://zmshzpogevuzoxlhqfeb.supabase.co";
-const SUPABASE_KEY = "sb_publishable_AiuJM7hYrKqZRxn_JWYWgA_s_VdqLgt";
+        <nav class="bottom-nav">
+            <div class="nav-item active" id="nav-home" onclick="navigate('home')"><i class="fas fa-recycle"></i><span>Materiais</span></div>
+            <div class="nav-item" id="nav-routes" onclick="navigate('routes')"><i class="fas fa-truck"></i><span>Coleta</span></div>
+            <div class="nav-item" id="nav-reports" onclick="navigate('reports'); carregarPainel();"><i class="fas fa-chart-pie"></i><span>Relatórios</span></div>
+            <div class="nav-item" id="nav-contact" onclick="navigate('contact')"><i class="fas fa-envelope"></i><span>Contato</span></div>
+        </nav>
+    </div>
 
-/* VARIÁVEIS */
-let materialAtual = "";
-let fotoBase64 = "";
+    <script>
+        const SUPABASE_URL = "https://zmshzpogevuzoxlhqfeb.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_AiuJM7hYrKqZRxn_JWYWgA_s_VdqLgt"; 
 
-/* CONTROLE DE TELAS */
-function mostrarTela(id){
-  document.querySelectorAll(".tela").forEach(t => t.classList.remove("ativa"));
-  document.getElementById(id).classList.add("ativa");
-}
+        let materialSelecionado = "";
+        let fotoBase64 = "";
 
-/* MATERIAL */
-function selecionarMaterial(material){
-  materialAtual = material;
-  document.getElementById("tituloMaterial").innerText = "Material: " + material;
-  mostrarTela("telaFoto");
-}
+        const materialsData = {
+            'Papel': {
+                recyclable: ['Jornais e Revistas', 'Caixas de Papelão', 'Envelopes', 'Folhas de caderno'],
+                nonRecyclable: ['Papel higiênico', 'Guardanapos engordurados', 'Fitas adesivas'],
+                disposal: 'Mantenha seco e limpo. Dobre caixas para ocupar menos espaço.'
+            },
+            'Plástico': {
+                recyclable: ['Garrafas PET', 'Embalagens de limpeza', 'Copos descartáveis'],
+                nonRecyclable: ['Cabo de panela', 'Adesivos', 'Embalagens metalizadas'],
+                disposal: 'Passe uma água rápida para retirar resíduos de alimento.'
+            },
+            'Metal': {
+                recyclable: ['Latas de alumínio', 'Latas de conserva', 'Tampinhas de garrafa'],
+                nonRecyclable: ['Esponjas de aço', 'Clipes e Grampos', 'Latas de tinta'],
+                disposal: 'Amasse as latas se possível para facilitar o transporte.'
+            },
+            'Vidro': {
+                recyclable: ['Garrafas', 'Potes de conserva', 'Copos', 'Frascos de perfume'],
+                nonRecyclable: ['Espelhos', 'Cristais', 'Lâmpadas', 'Vidro temperado'],
+                disposal: 'Cuidado! Se quebrado, embrulhe em jornal ou caixa de leite.'
+            },
+            'Eletrônicos': {
+                recyclable: ['Celulares antigos', 'Fios e cabos', 'Teclados e mouses', 'Placas'],
+                nonRecyclable: ['Lâmpadas fluorescentes (descarte especial)', 'CDs e DVDs (difícil reciclagem)'],
+                disposal: 'Não jogue no lixo comum. Leve ao ecoponto específico para lixo eletrônico.'
+            },
+            'Pilhas': {
+                recyclable: ['Pilhas AA, AAA', 'Baterias de celular', 'Baterias de notebook'],
+                nonRecyclable: ['Pilhas vazando (manuseie com luvas)'],
+                disposal: 'Isole os polos com fita. Nunca descarte no lixo orgânico.'
+            },
+            'Óleo Vegetal': {
+                recyclable: ['Óleo de cozinha usado (fritura)'],
+                nonRecyclable: ['Óleo misturado com produtos químicos ou água'],
+                disposal: 'Espere esfriar e coloque em uma garrafa PET bem fechada.'
+            },
+            'Não Reciclável': {
+                recyclable: [],
+                nonRecyclable: ['Papel higiênico', 'Fraldas e absorventes', 'Cerâmicas', 'Bitucas de cigarro'],
+                disposal: 'Este material deve ser encaminhado para o lixo comum (aterro sanitário).'
+            }
+        };
 
-/* CÂMERA */
-function abrirCamera(){
-  document.getElementById("camera").click();
-}
+        function navigate(screenId) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('screen-' + screenId).classList.add('active');
+            
+            const navBtn = document.getElementById('nav-' + screenId);
+            if(navBtn) navBtn.classList.add('active');
 
-document.getElementById("camera").addEventListener("change", function(e){
-  const file = e.target.files[0];
-  if(!file) return;
+            const headerTitle = document.getElementById('headerTitle');
+            const backBtn = document.getElementById('backBtn');
+            const mainContent = document.getElementById('main-content');
+            
+            // Remove padding para o mapa ocupar a tela toda
+            if(screenId === 'routes') {
+                mainContent.classList.add('no-padding');
+            } else {
+                mainContent.classList.remove('no-padding');
+            }
 
-  const reader = new FileReader();
-  reader.onload = function(){
-    fotoBase64 = reader.result;
-    document.getElementById("preview").src = fotoBase64;
-  };
-  reader.readAsDataURL(file);
-});
+            if(screenId === 'home') {
+                headerTitle.innerText = 'ReciclaLogo';
+                backBtn.style.display = 'none';
+            } else {
+                backBtn.style.display = 'block';
+                const titles = { routes: 'Rotas e Ecopontos', reports: 'Histórico', contact: 'Fale Conosco', details: 'Detalhes', collect: 'Registrar' };
+                if(titles[screenId]) headerTitle.innerText = titles[screenId];
+            }
+        }
+        function goBack() { navigate('home'); }
 
-/* SALVAR NO BANCO */
-async function salvarColeta(){
-  const empresa = document.getElementById("empresa").value.trim();
-  const quantidadeInput = document.getElementById("quantidade").value;
-  const quantidade = parseFloat(quantidadeInput);
+        function openDetails(type, color, icon) {
+            materialSelecionado = type;
+            const data = materialsData[type];
+            const contentDiv = document.getElementById('detail-content');
+            
+            const recList = data.recyclable.map(i => `<div class="list-item"><i class="fas fa-check" style="color:${color}"></i> ${i}</div>`).join('');
+            const nonRecList = data.nonRecyclable.map(i => `<div class="list-item"><i class="fas fa-times" style="color:#DC2626"></i> ${i}</div>`).join('');
 
-  if(!empresa || !quantidade || !fotoBase64){
-    alert("Preencha todos os campos e tire a foto");
-    return;
-  }
+            contentDiv.innerHTML = `
+                <div class="detail-header" style="background-color: ${color}">
+                    <i class="fas ${icon} fa-3x"></i>
+                    <h1 style="margin-top:10px">${type}</h1>
+                </div>
+                ${recList ? `<div class="section-title" style="color:${color}">✅ O que reciclar:</div>` : ''}
+                <div style="background:white; padding:10px; border-radius:8px; margin-bottom:10px;">${recList || '<small>Nenhum item listado.</small>'}</div>
+                <div class="section-title" style="color:#DC2626">❌ O que evitar:</div>
+                <div style="background:white; padding:10px; border-radius:8px; margin-bottom:10px;">${nonRecList}</div>
+                <div class="section-title">♻️ Como descartar:</div>
+                <div class="info-box" style="border-left: 4px solid ${color}">
+                    ${data.disposal}
+                </div>
+            `;
+            navigate('details');
+        }
 
-  const dados = {
-    empresa,
-    material: materialAtual,
-    quantidade,
-    foto_base64: fotoBase64
-  };
+        function openCollectScreen() {
+            document.getElementById('collect-material-name').innerText = materialSelecionado;
+            document.getElementById('empresa').value = "";
+            document.getElementById('quantidade').value = "";
+            document.getElementById('preview').style.display = 'none';
+            fotoBase64 = "";
+            navigate('collect');
+        }
 
-  try {
-    const resp = await fetch(`${SUPABASE_URL}/rest/v1/coletas`, {
-      method: "POST",
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`,
-        "Content-Type": "application/json",
-        "Prefer": "return=minimal"
-      },
-      body: JSON.stringify(dados)
-    });
+        document.getElementById("camera").addEventListener("change", function(e){
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(){
+                fotoBase64 = reader.result;
+                const img = document.getElementById("preview");
+                img.src = fotoBase64; img.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
 
-    if(resp.ok){
-      mostrarTela("telaSucesso");
-    } else {
-      const erro = await resp.text();
-      alert("Erro ao salvar no banco: " + erro);
-    }
-  } catch(err){
-    alert("Erro de conexão: " + err.message);
-  }
-}
+        async function salvarColeta(){
+            const empresa = document.getElementById("empresa").value.trim();
+            const quantidade = parseFloat(document.getElementById("quantidade").value);
+            if(!empresa || !quantidade || !fotoBase64){ alert("Preencha todos os campos e foto."); return; }
+            const btn = document.querySelector('#screen-collect button:last-child');
+            btn.innerText = 'Salvando...'; btn.disabled = true;
+            try {
+                const resp = await fetch(`${SUPABASE_URL}/rest/v1/coletas`, {
+                    method:"POST",
+                    headers:{ "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
+                    body: JSON.stringify({ empresa, material: materialSelecionado, quantidade, foto_base64: fotoBase64 })
+                });
+                if(resp.ok){ alert("✅ Sucesso!"); navigate('reports'); carregarPainel(); } else { alert("Erro ao salvar."); }
+            } catch(err){ alert("Erro de conexão."); } 
+            finally { btn.innerHTML = '<i class="fas fa-check"></i> Salvar no Sistema'; btn.disabled = false; }
+        }
 
-/* NOVA COLETA */
-function novaColeta(){
-  document.getElementById("empresa").value = "";
-  document.getElementById("quantidade").value = "";
-  document.getElementById("preview").src = "";
-  document.getElementById("camera").value = "";
-  fotoBase64 = "";
-  mostrarTela("telaMaterial");
-}
-</script>
+        async function carregarPainel(){
+            const container = document.getElementById("listaColetas");
+            container.innerHTML = '<p style="text-align:center">Carregando...</p>';
+            try {
+                const resp = await fetch(`${SUPABASE_URL}/rest/v1/coletas?select=*&order=data_coleta.desc`, {
+                    method:"GET", headers:{ "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+                });
+                if(!resp.ok) throw new Error();
+                const coletas = await resp.json();
+                container.innerHTML = coletas.length ? "" : "<p style='text-align:center'>Sem registros.</p>";
+                coletas.forEach(c => {
+                    const div = document.createElement("div");
+                    div.className = "coleta-item";
+                    div.innerHTML = `
+                        <div style="display:flex; justify-content:space-between;"><strong>${c.material}</strong><span>${c.quantidade} kg</span></div>
+                        <div style="font-size:14px; color:#666">${c.empresa}</div>
+                        ${c.foto_base64 ? `<img src="${c.foto_base64}" class="coleta-img-mini">` : ''}
+                    `;
+                    container.appendChild(div);
+                });
+                renderChart();
+            } catch(err){ container.innerHTML = "Erro ao carregar dados."; }
+        }
 
+        let myChart = null;
+        function renderChart() {
+            const ctx = document.getElementById('barChart');
+            if(myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Papel', 'Plástico', 'Vidro', 'Metal', 'Eletr.', 'Óleo'],
+                    datasets: [{ label: 'Kg', data: [45, 60, 20, 35, 10, 50], backgroundColor: '#2e7d32' }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+        }
+    </script>
 </body>
 </html>
