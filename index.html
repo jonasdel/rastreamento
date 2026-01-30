@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ReciclaLogo - App Completo</title>
+    <title>ReciclaLogo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -17,40 +17,82 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         
-        body { background-color: #e5e5e5; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        /* Ajuste: No celular, o fundo é a cor do app. No PC, mantém cinza para destacar. */
+        body { 
+            background-color: var(--bg); 
+            display: flex; 
+            justify-content: center; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
 
         #app-frame {
-            width: 100%; max-width: 400px; background-color: var(--bg); height: 100%;
-            position: relative; display: flex; flex-direction: column;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2); overflow: hidden;
+            width: 100%; 
+            height: 100%;
+            background-color: var(--bg);
+            position: relative; 
+            display: flex; 
+            flex-direction: column;
+            overflow: hidden;
         }
 
+        /* Apenas se a tela for muito grande (Computador), simula um celular */
+        @media (min-width: 500px) {
+            body { background-color: #e5e5e5; }
+            #app-frame {
+                max-width: 420px; /* Largura padrão de celular grande */
+                box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            }
+        }
+
+        /* HEADER PADRÃO */
         header {
-            background-color: var(--primary); color: white; padding: 20px; text-align: center;
-            padding-top: 50px; flex-shrink: 0; position: relative; z-index: 10;
+            background-color: var(--primary); 
+            color: white; 
+            padding: 15px; 
+            padding-top: 45px; /* Espaço seguro para status bar */
+            text-align: center;
+            flex-shrink: 0; 
+            position: relative; 
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
         
-        .header-title { font-size: 20px; font-weight: bold; }
-        .back-btn { position: absolute; left: 15px; top: 50px; color: white; cursor: pointer; font-size: 20px; display: none; }
+        .header-title { font-size: 19px; font-weight: bold; }
+        .back-btn { position: absolute; left: 15px; top: 46px; color: white; cursor: pointer; font-size: 20px; display: none; }
 
-        main { flex: 1; overflow-y: auto; padding: 20px; position: relative; }
-        /* Remove padding for map screen to fill area */
+        main { flex: 1; overflow-y: auto; padding: 15px; position: relative; }
         main.no-padding { padding: 0; overflow: hidden; }
 
         .screen { display: none; animation: fadeIn 0.3s ease; height: 100%; }
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* GRID HOME */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .card {
-            border-radius: 12px; padding: 15px; color: white;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 110px; box-shadow: var(--shadow); cursor: pointer; text-align: center;
+        /* GRID: Ajustado para preencher telas padrão (aprox 140px de altura por item) */
+        .grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            padding-bottom: 10px;
         }
-        .card:active { transform: scale(0.98); }
-        .card i { font-size: 28px; margin-bottom: 8px; }
-        .card span { font-weight: bold; font-size: 14px; }
+        .card {
+            border-radius: 16px; 
+            padding: 10px; 
+            color: white;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            height: 140px; /* Tamanho padrão equilibrado */
+            box-shadow: var(--shadow); 
+            cursor: pointer; 
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .card:active { transform: scale(0.97); transition: 0.1s; }
+        .card i { font-size: 34px; margin-bottom: 8px; }
+        .card span { font-weight: bold; font-size: 15px; }
 
         /* CORES */
         .bg-blue { background-color: #3B82F6; }
@@ -62,71 +104,73 @@
         .bg-brown { background-color: #D97706; }
         .bg-dark { background-color: #374151; }
 
-        /* ESTILOS DA TELA DE ROTAS (Idêntico ao Print) */
+        /* MAPA / ROTAS */
         .map-container {
             width: 100%; height: 100%; position: relative;
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/ec/OpenStreetMap_im_Dortmunder_Westen.png'); /* Imagem de Mapa Genérica */
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/ec/OpenStreetMap_im_Dortmunder_Westen.png'); 
             background-size: cover; background-position: center;
         }
-        
         .search-bar-container {
-            position: absolute; top: 20px; left: 20px; right: 20px;
-            background: white; border-radius: 4px; padding: 0 15px; height: 45px;
-            display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2;
+            position: absolute; top: 15px; left: 15px; right: 15px;
+            background: white; border-radius: 8px; padding: 0 15px; height: 50px;
+            display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 2;
         }
-        .search-bar-container input { border: none; outline: none; flex: 1; font-size: 14px; margin-left: 10px; }
+        .search-bar-container input { border: none; outline: none; flex: 1; font-size: 16px; margin-left: 10px; }
         
         .toggle-container {
-            position: absolute; top: 80px; left: 20px; right: 20px;
+            position: absolute; top: 80px; left: 15px; right: 15px;
             display: flex; gap: 10px; z-index: 2;
         }
         .toggle-btn {
-            flex: 1; padding: 10px; border-radius: 20px; text-align: center;
-            font-weight: bold; font-size: 13px; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            flex: 1; padding: 12px; border-radius: 25px; text-align: center;
+            font-weight: bold; font-size: 14px; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             cursor: pointer;
         }
-        .toggle-active { background-color: #166534; } /* Verde Escuro */
-        .toggle-inactive { background-color: #888; } /* Cinza */
+        .toggle-active { background-color: #166534; }
+        .toggle-inactive { background-color: #888; }
 
         .map-pin {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: #F97316; font-size: 40px; z-index: 1; text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            color: #F97316; font-size: 45px; z-index: 1; text-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
         .bottom-card-overlay {
             position: absolute; bottom: 20px; left: 15px; right: 15px;
-            background: white; border-radius: 15px; padding: 20px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 2;
+            background: white; border-radius: 20px; padding: 25px;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 2;
         }
-        .bottom-card-text { font-size: 14px; color: #555; margin-bottom: 15px; line-height: 1.4; }
+        .bottom-card-text { font-size: 15px; color: #444; margin-bottom: 15px; line-height: 1.4; text-align: center; }
         .bottom-card-btn {
             background-color: #166534; color: white; text-align: center;
-            padding: 12px; border-radius: 25px; font-weight: bold; font-size: 14px;
+            padding: 14px; border-radius: 30px; font-weight: bold; font-size: 14px;
             text-transform: uppercase; width: 100%; border: none; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        /* OUTROS ESTILOS */
+        /* GERAIS */
         .btn-action {
-            background-color: var(--primary); color: white; border: none; padding: 14px;
-            border-radius: 12px; font-size: 16px; margin-top: 15px; width: 100%;
+            background-color: var(--primary); color: white; border: none; padding: 16px;
+            border-radius: 14px; font-size: 16px; margin-top: 15px; width: 100%;
             cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600;
         }
-        .form-input { width: 100%; padding: 14px; margin-top: 10px; border-radius: 12px; border: 1px solid #ccc; }
-        .preview-img { width: 100%; margin-top: 12px; border-radius: 16px; display: none; object-fit: cover; height: 200px; border: 2px dashed #ccc; }
-        
+        .form-input { width: 100%; padding: 15px; margin-top: 10px; border-radius: 12px; border: 1px solid #ccc; font-size: 16px; }
+        .preview-img { width: 100%; margin-top: 12px; border-radius: 16px; display: none; object-fit: cover; height: 250px; border: 2px dashed #ccc; }
         .coleta-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: var(--shadow); border-left: 5px solid var(--primary); }
         .coleta-img-mini { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-top: 8px; }
-        .info-box { background:#fff; padding:15px; border-radius:8px; font-size: 14px; line-height: 1.5; color: #444; }
-        .list-item { padding: 6px 0; border-bottom: 1px solid #ddd; color: #555; font-size: 14px; display: flex; align-items: center; }
-        .section-title { font-weight: bold; color: var(--text); margin-top: 15px; margin-bottom: 8px; font-size: 16px; }
-        .detail-header { border-radius: 12px; padding: 25px; color: white; text-align: center; margin-bottom: 20px; }
+        .info-box { background:#fff; padding:20px; border-radius:12px; font-size: 15px; line-height: 1.6; color: #444; }
+        .list-item { padding: 8px 0; border-bottom: 1px solid #ddd; color: #555; font-size: 15px; display: flex; align-items: center; }
+        .section-title { font-weight: bold; color: var(--text); margin-top: 20px; margin-bottom: 10px; font-size: 17px; }
+        .detail-header { border-radius: 16px; padding: 30px; color: white; text-align: center; margin-bottom: 20px; }
 
+        /* NAVEGAÇÃO INFERIOR */
         nav.bottom-nav {
-            background: white; border-top: 1px solid #e5e5e5; display: flex; justify-content: space-around; padding: 10px 0; flex-shrink: 0; z-index: 10;
+            background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; 
+            padding: 10px 0; padding-bottom: 20px; /* Extra padding para iPhones novos (Home bar) */
+            flex-shrink: 0; z-index: 10;
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #9CA3AF; font-size: 11px; cursor: pointer; width: 20%; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #9CA3AF; font-size: 11px; cursor: pointer; width: 20%; justify-content: center; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
-        .nav-item i { font-size: 18px; margin-bottom: 4px; }
+        .nav-item i { font-size: 22px; margin-bottom: 4px; }
     </style>
 </head>
 <body>
@@ -139,7 +183,7 @@
 
         <main id="main-content">
             <div id="screen-home" class="screen active">
-                <p style="text-align:center; color:#666; margin-bottom:15px; font-size:14px;">Selecione para aprender e descartar</p>
+                <p style="text-align:center; color:#666; margin-bottom:12px; margin-top:5px; font-size:14px;">Selecione para aprender e descartar</p>
                 <div class="grid">
                     <div class="card bg-blue" onclick="openDetails('Papel', '#3B82F6', 'fa-newspaper')"><i class="fas fa-newspaper"></i><span>Papel</span></div>
                     <div class="card bg-red" onclick="openDetails('Plástico', '#EF4444', 'fa-wine-bottle')"><i class="fas fa-wine-bottle"></i><span>Plástico</span></div>
@@ -170,19 +214,15 @@
 
             <div id="screen-routes" class="screen">
                 <div class="map-container">
-                    
                     <div class="search-bar-container">
                         <input type="text" placeholder="Digite o endereço desejado">
                         <i class="fas fa-search" style="color: #666;"></i>
                     </div>
-
                     <div class="toggle-container">
                         <div class="toggle-btn toggle-active">ROTAS</div>
                         <div class="toggle-btn toggle-inactive">ECOPONTOS</div>
                     </div>
-
                     <i class="fas fa-map-marker-alt map-pin"></i>
-
                     <div class="bottom-card-overlay">
                         <p class="bottom-card-text">
                             Sua localização não está na rota de coleta ou próxima a um ecoponto.
@@ -191,16 +231,15 @@
                             BUSCAR MEUS RECICLÁVEIS
                         </button>
                     </div>
-
                 </div>
             </div>
 
             <div id="screen-reports" class="screen">
                 <h2 style="color: var(--primary);">Painel de Impacto</h2>
-                <div style="background:white; padding:10px; border-radius:12px; margin: 15px 0;">
-                    <canvas id="barChart" style="max-height: 150px;"></canvas>
+                <div style="background:white; padding:15px; border-radius:12px; margin: 15px 0;">
+                    <canvas id="barChart" style="max-height: 200px;"></canvas>
                 </div>
-                <h3 style="font-size:16px; margin-bottom:10px;">Registros Recentes</h3>
+                <h3 style="font-size:17px; margin-bottom:10px;">Registros Recentes</h3>
                 <div id="listaColetas"><p style="text-align:center">Carregando...</p></div>
             </div>
 
@@ -209,10 +248,10 @@
                 <div class="info-box" style="margin-top:15px; box-shadow: var(--shadow);">
                     <label style="font-weight:bold;">Sua Mensagem</label>
                     <input class="form-input" placeholder="Seu nome">
-                    <textarea class="form-input" style="height:80px; resize:none" placeholder="Como podemos ajudar?"></textarea>
+                    <textarea class="form-input" style="height:100px; resize:none" placeholder="Como podemos ajudar?"></textarea>
                     <button class="btn-action" onclick="alert('Mensagem enviada!')">Enviar</button>
                 </div>
-                <div style="text-align:center; margin-top:20px; font-size:12px; color:#888;">
+                <div style="text-align:center; margin-top:20px; font-size:13px; color:#888;">
                     <p><strong>ReciclaLogo Associação</strong></p>
                     <p>suporte@reciclalogo.com</p>
                 </div>
@@ -289,7 +328,6 @@
             const backBtn = document.getElementById('backBtn');
             const mainContent = document.getElementById('main-content');
             
-            // Remove padding para o mapa ocupar a tela toda
             if(screenId === 'routes') {
                 mainContent.classList.add('no-padding');
             } else {
