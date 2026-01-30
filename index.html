@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ReciclaLogo</title>
+    <title>ASSCAVAG</title>
+        
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
@@ -16,7 +19,7 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Roboto, Helvetica, Arial, sans-serif; }
         
-        /* CORREÇÃO PARA CELULAR (DVH) */
+        /* --- LAYOUT BLINDADO PARA CELULAR --- */
         body { 
             background-color: #333; 
             display: flex; 
@@ -32,7 +35,7 @@
             height: 100%;
             background-color: var(--bg);
             display: flex; 
-            flex-direction: column;
+            flex-direction: column; 
             position: relative;
             overflow: hidden;
         }
@@ -41,11 +44,11 @@
             #app-frame { max-width: 412px; }
         }
 
-        /* --- HEADER --- */
+        /* --- CABEÇALHO FINO --- */
         header {
             background-color: var(--primary); 
             color: white; 
-            height: 56px; 
+            height: 48px; 
             display: flex;
             align-items: center; 
             justify-content: center;
@@ -54,35 +57,41 @@
             z-index: 10;
         }
         
-        .header-title { font-size: 19px; font-weight: 600; }
-        .back-btn { position: absolute; left: 16px; color: white; cursor: pointer; font-size: 20px; display: none; }
+        .header-title { font-size: 18px; font-weight: 600; }
+        .back-btn { position: absolute; left: 16px; color: white; cursor: pointer; font-size: 18px; display: none; }
 
-        /* --- MAIN --- */
+        /* --- ÁREA PRINCIPAL --- */
         main { 
             flex: 1; 
             display: flex; 
             flex-direction: column; 
-            padding: 10px 12px; 
-            padding-bottom: 70px; /* Espaço para menu */
+            padding: 8px 10px; 
+            padding-bottom: 60px; 
             overflow-y: auto; 
             position: relative;
         }
-        main.no-padding { padding: 0; padding-bottom: 60px; }
+        
+        main.no-padding { padding: 8px 10px; padding-bottom: 60px; }
 
-        .screen { display: none; height: 100%; width: 100%; flex-direction: column; }
+        .screen { 
+            display: none; 
+            flex-direction: column; 
+            height: 100%; 
+            width: 100%; 
+        }
         .screen.active { display: flex; }
 
         .instruction-text {
-            text-align: center; color: #666; font-size: 13px; margin-bottom: 8px; flex-shrink: 0;
+            text-align: center; color: #666; font-size: 12px; margin-bottom: 5px; flex-shrink: 0;
         }
 
-        /* --- GRID --- */
+        /* --- GRID MATEMÁTICO --- */
         .grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
             grid-template-rows: repeat(4, 1fr); 
-            gap: 10px; 
-            flex: 1; 
+            gap: 8px; 
+            height: 100%; 
             min-height: 0;
         }
         
@@ -93,117 +102,56 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center;
-            width: 100%; height: 100%; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            width: 100%; 
+            height: 100%; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15); 
             cursor: pointer; 
             position: relative;
         }
         .card:active { transform: scale(0.98); opacity: 0.9; }
-        .card i { font-size: 32px; margin-bottom: 5px; }
+        .card i { font-size: 28px; margin-bottom: 4px; }
         .card span { font-weight: bold; font-size: 13px; text-transform: uppercase; }
 
         /* Cores */
-        .bg-blue { background-color: #1976D2; }
-        .bg-red { background-color: #D32F2F; }
-        .bg-yellow { background-color: #FBC02D; }
-        .bg-green { background-color: #388E3C; }
-        .bg-gray { background-color: #616161; }
-        .bg-orange { background-color: #F57C00; }
-        .bg-brown { background-color: #E64A19; }
-        .bg-dark { background-color: #455A64; }
+        .bg-blue { background-color: #1976D2; } .bg-red { background-color: #D32F2F; }
+        .bg-yellow { background-color: #FBC02D; } .bg-green { background-color: #388E3C; }
+        .bg-gray { background-color: #616161; } .bg-orange { background-color: #F57C00; }
+        .bg-brown { background-color: #E64A19; } .bg-dark { background-color: #455A64; }
 
-        /* --- ESTILOS DO RELATÓRIO --- */
-        .report-item {
-            background: white;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 5px solid var(--primary);
-            display: flex;
-            flex-direction: column;
-        }
-        .report-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-        .report-img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-top: 8px;
-            border: 1px solid #eee;
-        }
+        /* --- UI ELEMENTS --- */
+        .scrollable-content { overflow-y: auto; flex: 1; padding: 2px; }
+        .btn-action { background-color: var(--primary); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 15px; margin-top: auto; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; }
+        .btn-action:disabled { background-color: #ccc; cursor: not-allowed; }
+        .form-input { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 15px; }
+        
+        /* --- RELATÓRIO --- */
+        .report-item { background: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid var(--primary); display: flex; flex-direction: column; }
+        .report-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 5px; }
+        .report-header strong { color: var(--primary); font-size: 15px; }
+        .report-details { display: flex; flex-direction: column; gap: 4px; }
+        .detail-row { display: flex; align-items: center; font-size: 13px; color: #555; }
+        .detail-row i { width: 20px; text-align: center; margin-right: 6px; color: #888; }
+        .report-img { width: 100%; height: 140px; object-fit: cover; border-radius: 6px; margin-top: 8px; border: 1px solid #eee; }
 
-        /* --- MAPA E GPS --- */
-        .map-container {
-            width: 100%; height: 100%; position: relative;
-            background-color: #e5e3df;
-            display: flex; flex-direction: column;
-        }
+        /* --- MAPA --- */
+        .map-container { width: 100%; height: 100%; position: relative; background-color: #e5e3df; display: flex; flex-direction: column; }
         .map-frame { border:0; width:100%; height:100%; opacity: 0.7; }
+        .search-bar-container { position: absolute; top: 15px; left: 15px; right: 15px; background: white; border-radius: 4px; padding: 0 15px; height: 45px; display: flex; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 2; }
+        .search-bar-container input { border: none; outline: none; flex: 1; font-size: 15px; margin-left: 10px; }
+        .bottom-card-overlay { position: absolute; bottom: 20px; left: 15px; right: 15px; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); z-index: 2; text-align: center; }
+        .gps-button { background-color: #1976D2; color: white; text-align: center; padding: 12px; border-radius: 25px; font-weight: bold; font-size: 13px; text-transform: uppercase; width: 100%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
-        .search-bar-container {
-            position: absolute; top: 15px; left: 15px; right: 15px;
-            background: white; border-radius: 4px; padding: 0 15px; height: 48px;
-            display: flex; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 2;
+        /* --- RODAPÉ FIXO --- */
+        nav.bottom-nav { 
+            background: white; border-top: 1px solid #ddd; 
+            display: flex; justify-content: space-around; align-items: center; 
+            position: absolute; bottom: 0; left: 0; width: 100%; 
+            height: 55px; 
+            z-index: 999; padding-bottom: env(safe-area-inset-bottom); 
         }
-        .search-bar-container input { border: none; outline: none; flex: 1; font-size: 16px; margin-left: 10px; }
-
-        .toggle-container {
-            position: absolute; top: 75px; left: 15px; right: 15px;
-            display: flex; gap: 10px; z-index: 2;
-        }
-        .toggle-btn {
-            flex: 1; padding: 10px; border-radius: 25px; text-align: center;
-            font-weight: bold; font-size: 13px; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            cursor: pointer;
-        }
-        .toggle-active { background-color: #1b5e20; }
-        .toggle-inactive { background-color: #757575; }
-
-        .bottom-card-overlay {
-            position: absolute; bottom: 20px; left: 15px; right: 15px;
-            background: white; border-radius: 12px; padding: 20px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.2); z-index: 2; text-align: center;
-        }
-        .bottom-card-text { font-size: 14px; color: #444; margin-bottom: 15px; line-height: 1.4; }
-        
-        .gps-button {
-            background-color: #1976D2; 
-            color: white; text-align: center;
-            padding: 12px; border-radius: 25px; font-weight: bold; font-size: 14px;
-            text-transform: uppercase; width: 100%; border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        .gps-status { font-size: 12px; color: #666; margin-top: 8px; font-style: italic; }
-
-        /* GERAIS */
-        .scrollable-content { overflow-y: auto; flex: 1; padding: 5px; }
-        .btn-action {
-            background-color: var(--primary); color: white; border: none; padding: 15px;
-            border-radius: 8px; font-size: 16px; margin-top: auto; width: 100%;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold;
-        }
-        .form-input { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
-        
-        /* --- MENU FIXO --- */
-        nav.bottom-nav {
-            background: white; 
-            border-top: 1px solid #ddd; 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center;
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            height: 60px; 
-            z-index: 999;
-            padding-bottom: env(safe-area-inset-bottom); 
-        }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #757575; font-size: 10px; cursor: pointer; width: 25%; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item i { font-size: 24px; margin-bottom: 2px; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #999; font-size: 10px; cursor: pointer; width: 25%; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-item i { font-size: 22px; margin-bottom: 2px; }
     </style>
 </head>
 <body>
@@ -211,7 +159,7 @@
     <div id="app-frame">
         <header>
             <i class="fas fa-arrow-left back-btn" id="backBtn" onclick="goBack()"></i>
-            <div class="header-title" id="headerTitle">ReciclaLogo</div>
+            <div class="header-title" id="headerTitle">ASSCAVAG</div>
         </header>
 
         <main id="main-content">
@@ -231,55 +179,47 @@
 
             <div id="screen-details" class="screen">
                 <div class="scrollable-content" id="detail-content"></div>
-                <button class="btn-action" style="background-color: #F57C00; margin-top: 10px;" onclick="openCollectScreen()">
+                <button class="btn-action" style="background-color: #F57C00;" onclick="openCollectScreen()">
                     <i class="fas fa-camera"></i> REGISTRAR DESCARTE
                 </button>
             </div>
             
             <div id="screen-collect" class="screen">
                 <div class="scrollable-content">
-                    <h2 style="color: var(--primary); margin-bottom: 10px;">Novo Registro</h2>
+                    <h2 style="color: #2e7d32; margin-bottom: 10px;">Novo Registro</h2>
                     <p>Material: <strong id="collect-material-name">---</strong></p>
                     <input id="empresa" class="form-input" placeholder="Local / Empresa">
                     <input id="quantidade" type="number" class="form-input" placeholder="Quantidade (kg)">
                     
                     <input id="camera" type="file" accept="image/*" capture="environment" style="display:none">
-                    
                     <button class="btn-action" style="background:#666; margin-top:15px" onclick="document.getElementById('camera').click()">
                         <i class="fas fa-camera"></i> TIRAR FOTO
                     </button>
-                    
                     <img id="preview" style="width:100%; margin-top:10px; display:none; border-radius:8px; border: 2px dashed #ccc; min-height: 150px; object-fit: cover;">
                 </div>
-                <button class="btn-action" onclick="salvarColeta()">SALVAR</button>
+                <button class="btn-action" onclick="salvarColeta()">SALVAR NO BANCO</button>
             </div>
 
             <div id="screen-routes" class="screen">
                 <div class="map-container">
                     <iframe id="mapa-frame" class="map-frame" src="https://maps.google.com/maps?q=-23.550520,-46.633308&z=12&output=embed" allowfullscreen="" loading="lazy"></iframe>
                     <div class="search-bar-container"><input type="text" placeholder="Endereço desejado"><i class="fas fa-search" style="color: #666;"></i></div>
-                    <div class="toggle-container"><div class="toggle-btn toggle-active">ROTAS</div><div class="toggle-btn toggle-inactive">ECOPONTOS</div></div>
                     <div class="bottom-card-overlay">
-                        <p class="bottom-card-text">Deseja ver sua localização atual no mapa?</p>
-                        <button class="gps-button" onclick="buscarLocalizacaoReal()">
-                            <i class="fas fa-location-arrow"></i> MINHA LOCALIZAÇÃO
-                        </button>
+                        <p style="text-align:center; margin-bottom:10px; font-size:14px; color:#444;">Ver localização no mapa?</p>
+                        <button class="gps-button" onclick="buscarLocalizacaoReal()"><i class="fas fa-location-arrow"></i> MINHA LOCALIZAÇÃO</button>
                         <div id="gps-status" class="gps-status"></div>
                     </div>
                 </div>
             </div>
 
             <div id="screen-reports" class="screen">
-                <h2 style="color: var(--primary);">Relatórios</h2>
-                <div style="background:white; padding:10px; border-radius:8px; margin:15px 0;"><canvas id="barChart"></canvas></div>
-                
-                <div id="listaColetas" class="scrollable-content">
-                    <p style="text-align:center; color: #666; margin-top: 20px;">Nenhum registro ainda.</p>
-                </div>
+                <h2 style="color: #2e7d32;">Relatórios</h2>
+                <div style="background:white; padding:10px; border-radius:8px; margin:10px 0;"><canvas id="barChart" height="180"></canvas></div>
+                <div id="listaColetas" class="scrollable-content"><p style="text-align:center; color: #666;">Carregando...</p></div>
             </div>
 
             <div id="screen-contact" class="screen">
-                <h2 style="color: var(--primary);">Contato</h2>
+                <h2 style="color: #2e7d32;">Contato</h2>
                 <input class="form-input" placeholder="Nome"><textarea class="form-input" style="height:120px" placeholder="Mensagem"></textarea>
                 <button class="btn-action" onclick="alert('Enviado!')">ENVIAR</button>
             </div>
@@ -294,11 +234,17 @@
     </div>
 
     <script>
-        // LISTA GLOBAL PARA GUARDAR AS COLETAS (Memória temporária)
-        let globalColetas = [];
+        // CONFIGURAÇÃO SUPABASE
+        const SUPABASE_URL = 'https://zmshzpogevuzoxlhqfeb.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_AiuJM7hYrKqZRxn_JWYWgA_s_VdqLgt';
+        
+        // CORREÇÃO AQUI: Mudamos o nome da variável para não dar conflito
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         let materialSelecionado = "";
         let fotoBase64 = "";
 
+        // DADOS LOCAIS (Para informação)
         const materialsData = {
             'Papel': {recyclable:['Jornais','Caixas'], nonRecyclable:['Papel Higiênico'], disposal:'Limpo e seco.'},
             'Plástico': {recyclable:['PET','Copos'], nonRecyclable:['Cabo panela'], disposal:'Lavar antes.'},
@@ -310,22 +256,23 @@
             'Lixo Comum': {recyclable:[], nonRecyclable:['Tudo'], disposal:'Aterro sanitário.'}
         };
 
+        // NAVEGAÇÃO
         function navigate(screenId) {
             document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById('screen-' + screenId).classList.add('active');
-            
             const navBtn = document.getElementById('nav-' + screenId);
             if(navBtn) navBtn.classList.add('active');
-
             const headerTitle = document.getElementById('headerTitle');
             const backBtn = document.getElementById('backBtn');
             const mainContent = document.getElementById('main-content');
             
-            if(screenId === 'routes') mainContent.classList.add('no-padding');
-            else mainContent.classList.remove('no-padding');
+            // Ajuste de padding para home/rotas ficarem colados na borda
+            if(screenId === 'home' || screenId === 'routes') mainContent.style.padding = "0";
+            else mainContent.style.padding = "10px 12px";
+            mainContent.style.paddingBottom = "60px";
 
-            if(screenId === 'home') { headerTitle.innerText = 'ReciclaLogo'; backBtn.style.display = 'none'; } 
+            if(screenId === 'home') { headerTitle.innerText = 'ASSCAVAG'; backBtn.style.display = 'none'; } 
             else { 
                 backBtn.style.display = 'block'; 
                 const titles = { routes: 'Rotas', reports: 'Relatórios', contact: 'Contato', details: 'Detalhes', collect: 'Registro' };
@@ -343,9 +290,9 @@
                     <i class="${icon} fa-3x"></i><h2 style="margin-top:10px">${type}</h2>
                 </div>
                 <div style="background:white; padding:15px; border-radius:12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <h3 style="color:${color}; border-bottom:1px solid #eee; padding-bottom:5px">✅ O que pode</h3><p style="margin:8px 0">${data.recyclable.join(', ') || 'Nenhum'}</p>
-                    <h3 style="color:red; margin-top:15px; border-bottom:1px solid #eee; padding-bottom:5px">❌ O que não pode</h3><p style="margin:8px 0">${data.nonRecyclable.join(', ')}</p>
-                    <h3 style="margin-top:15px; border-bottom:1px solid #eee; padding-bottom:5px">ℹ️ Como descartar</h3><p style="margin:8px 0">${data.disposal}</p>
+                    <h3 style="color:${color}; border-bottom:1px solid #eee; font-size:15px">✅ O que pode</h3><p style="margin:5px 0 10px; font-size:14px">${data.recyclable.join(', ') || 'Nenhum'}</p>
+                    <h3 style="color:#D32F2F; border-bottom:1px solid #eee; font-size:15px">❌ O que não pode</h3><p style="margin:5px 0 10px; font-size:14px">${data.nonRecyclable.join(', ')}</p>
+                    <h3 style="margin-top:10px; border-bottom:1px solid #eee; font-size:15px">ℹ️ Descarte</h3><p style="margin:5px 0; font-size:14px">${data.disposal}</p>
                 </div>
             `;
             navigate('details');
@@ -353,16 +300,14 @@
 
         function openCollectScreen() {
             document.getElementById('collect-material-name').innerText = materialSelecionado;
-            // Limpar campos
             document.getElementById("empresa").value = "";
             document.getElementById("quantidade").value = "";
             document.getElementById("preview").style.display = 'none';
             document.getElementById("preview").src = "";
-            fotoBase64 = ""; // Resetar foto
+            fotoBase64 = "";
             navigate('collect');
         }
 
-        /* GPS REAL */
         function buscarLocalizacaoReal() {
             const statusDiv = document.getElementById("gps-status");
             const mapaFrame = document.getElementById("mapa-frame");
@@ -372,20 +317,20 @@
                 (position) => {
                     const lat = position.coords.latitude;
                     const long = position.coords.longitude;
-                    statusDiv.innerHTML = "Localização atualizada!";
+                    statusDiv.innerHTML = "Localização encontrada!";
                     mapaFrame.src = `https://maps.google.com/maps?q=${lat},${long}&z=15&output=embed`;
                 },
-                (error) => { statusDiv.innerHTML = "Erro GPS."; console.error(error); }
+                (error) => { statusDiv.innerHTML = "Erro ao acessar GPS."; }
             );
         }
 
-        // --- CÂMERA E PREVIEW ---
         document.getElementById("camera").addEventListener("change", function(e){
             const file = e.target.files[0];
             if(!file) return;
+            if(file.size > 3000000) { alert("Foto muito grande. Use uma menor."); return; }
             const reader = new FileReader();
             reader.onload = function(){
-                fotoBase64 = reader.result; // Guarda a foto em base64
+                fotoBase64 = reader.result;
                 const img = document.getElementById("preview");
                 img.src = fotoBase64; 
                 img.style.display = 'block';
@@ -393,73 +338,115 @@
             reader.readAsDataURL(file);
         });
 
-        // --- SALVAR NA LISTA (MEMÓRIA) ---
-        function salvarColeta(){
+        // --- SALVAR NO SUPABASE ---
+        async function salvarColeta(){
             const empresa = document.getElementById("empresa").value;
             const quantidade = document.getElementById("quantidade").value;
             
             if(!empresa || !quantidade){ alert("Preencha todos os campos!"); return; }
 
-            // Cria o objeto da coleta
-            const novaColeta = {
-                material: materialSelecionado,
-                empresa: empresa,
-                qtd: quantidade,
-                foto: fotoBase64, // Aqui vai a foto!
-                data: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
-            };
-
-            // Adiciona no início da lista global
-            globalColetas.unshift(novaColeta);
-
             const btn = document.querySelector('#screen-collect button:last-child');
-            btn.innerHTML = 'Salvando...';
-            
-            setTimeout(() => {
-                alert("Coleta registrada!"); 
-                btn.innerHTML = 'SALVAR';
+            btn.innerText = 'ENVIANDO...';
+            btn.disabled = true;
+
+            try {
+                // CORREÇÃO: Usando 'quantidade' e 'status' conforme sua imagem do banco
+                // E formatando data apenas como YYYY-MM-DD para aceitar no tipo 'date'
+                const { error } = await supabaseClient
+                    .from('coletas')
+                    .insert({ 
+                        material: materialSelecionado, 
+                        empresa: empresa, 
+                        quantidade: parseFloat(quantidade), 
+                        foto_base64: fotoBase64,
+                        status: 'pendente', 
+                        data_coleta: new Date().toISOString().split('T')[0] // Data formato Date
+                    });
+
+                if (error) {
+                    if(error.message.includes("row-level security")) {
+                        throw new Error("ERRO DE PERMISSÃO: Rode 'ALTER TABLE coletas DISABLE ROW LEVEL SECURITY;' no Supabase.");
+                    }
+                    throw error;
+                }
+
+                alert("✅ Salvo com sucesso!");
                 navigate('reports'); 
-                carregarPainel(); // Atualiza a tela de relatórios
-            }, 800);
+                carregarPainel();
+
+            } catch (error) {
+                console.error("Erro completo:", error);
+                alert("Erro ao salvar: " + error.message);
+            } finally {
+                btn.innerText = 'SALVAR NO BANCO';
+                btn.disabled = false;
+            }
         }
 
-        // --- CARREGAR RELATÓRIOS (COM FOTO) ---
-        function carregarPainel(){
+        // --- LER DO SUPABASE ---
+        async function carregarPainel(){
              const container = document.getElementById("listaColetas");
-             container.innerHTML = ""; // Limpa a lista
+             container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">Atualizando...</p>';
+             
+             try {
+                 // Usa o cliente correto
+                 const { data: dbColetas, error } = await supabaseClient
+                    .from('coletas')
+                    .select('*')
+                    .order('id', { ascending: false });
 
-             if (globalColetas.length === 0) {
-                 container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">Nenhum registro ainda.</p>';
-                 return;
+                 if (error) throw error;
+
+                 container.innerHTML = "";
+                 if (!dbColetas || dbColetas.length === 0) {
+                     container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">Nenhum registro.</p>';
+                     return;
+                 }
+
+                 let totais = { 'Papel': 0, 'Vidro': 0, 'Plástico': 0 };
+
+                 dbColetas.forEach(item => {
+                     let qtdNum = parseFloat(item.quantidade) || 0;
+                     if (totais[item.material] !== undefined) totais[item.material] += qtdNum;
+
+                     const imgHtml = item.foto_base64 ? `<img src="${item.foto_base64}" class="report-img">` : '';
+                     
+                     const cardHtml = `
+                        <div class="report-item">
+                            <div class="report-header">
+                                <strong>${item.material}</strong>
+                                <small>ID: ${item.id}</small>
+                            </div>
+                            <div class="report-details">
+                                <div class="detail-row"><i class="fas fa-weight-hanging"></i> <strong>${qtdNum} kg</strong></div>
+                                <div class="detail-row"><i class="fas fa-user"></i> <span>${item.empresa}</span></div>
+                            </div>
+                            ${imgHtml}
+                        </div>
+                     `;
+                     container.innerHTML += cardHtml;
+                 });
+
+                 // Gráfico
+                 if(window.myChartInstance) window.myChartInstance.destroy();
+                 const ctx = document.getElementById('barChart');
+                 window.myChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: { 
+                        labels: ['Papel','Vidro', 'Plástico'], 
+                        datasets: [{ 
+                            label: 'Kg Coletados', 
+                            data: [totais['Papel'], totais['Vidro'], totais['Plástico']], 
+                            backgroundColor: ['#1976D2', '#388E3C', '#D32F2F'] 
+                        }] 
+                    },
+                    options: { responsive: true, plugins: { legend: { display: false } } }
+                 });
+
+             } catch (error) {
+                 console.error(error);
+                 container.innerHTML = '<p style="text-align:center; color:red;">Erro ao carregar dados.</p>';
              }
-
-             // Percorre a lista e cria os cards
-             globalColetas.forEach(item => {
-                 // Verifica se tem foto para mostrar
-                 const imgHtml = item.foto ? `<img src="${item.foto}" class="report-img">` : '';
-
-                 const cardHtml = `
-                    <div class="report-item">
-                        <div class="report-header">
-                            <strong>${item.material}</strong>
-                            <small style="color:#666">${item.data}</small>
-                        </div>
-                        <div style="font-size:14px; color:#444">
-                            ${item.qtd}kg • ${item.empresa}
-                        </div>
-                        ${imgHtml}
-                    </div>
-                 `;
-                 container.innerHTML += cardHtml;
-             });
-
-             // Atualiza Gráfico (Simples)
-             // (Em um app real, somaria os valores de 'globalColetas')
-             new Chart(document.getElementById('barChart'), {
-                type: 'bar',
-                data: { labels: ['Papel','Vidro', 'Plástico'], datasets: [{ label: 'Kg', data: [15, 8, 22], backgroundColor: ['#1976D2', '#388E3C', '#D32F2F'] }] },
-                options: { responsive: true, plugins: { legend: { display: false } } }
-             });
         }
     </script>
 </body>
