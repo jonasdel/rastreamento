@@ -3,23 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ASSCAVAG</title>
-        
+    <title>Tipo de Residuos</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
-            --primary: #2e7d32;
+            --primary: #1b5e20;
             --bg: #F5F5F5;
             --text: #333;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Roboto, Helvetica, Arial, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         
-        /* --- LAYOUT BLINDADO PARA CELULAR --- */
         body { 
             background-color: #333; 
             display: flex; 
@@ -35,7 +33,7 @@
             height: 100%;
             background-color: var(--bg);
             display: flex; 
-            flex-direction: column; 
+            flex-direction: column;
             position: relative;
             overflow: hidden;
         }
@@ -44,255 +42,518 @@
             #app-frame { max-width: 412px; }
         }
 
-        /* --- CABEÇALHO FINO --- */
+        /* --- HEADER --- */
         header {
             background-color: var(--primary); 
             color: white; 
-            height: 48px; 
+            height: 56px; 
             display: flex;
             align-items: center; 
-            justify-content: center;
+            justify-content: space-between;
+            padding: 0 16px;
             flex-shrink: 0; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             z-index: 10;
         }
         
-        .header-title { font-size: 18px; font-weight: 600; }
-        .back-btn { position: absolute; left: 16px; color: white; cursor: pointer; font-size: 18px; display: none; }
+        .header-title { font-size: 20px; font-weight: 700; }
+        .header-icon { font-size: 20px; cursor: pointer; color: white; }
 
-        /* --- ÁREA PRINCIPAL --- */
+        /* --- MAIN CONTENT --- */
         main { 
             flex: 1; 
             display: flex; 
             flex-direction: column; 
-            padding: 8px 10px; 
-            padding-bottom: 60px; 
+            padding: 0; 
+            padding-bottom: 70px; 
             overflow-y: auto; 
             position: relative;
+            background-color: #E8F5E9; 
         }
-        
-        main.no-padding { padding: 8px 10px; padding-bottom: 60px; }
 
-        .screen { 
-            display: none; 
-            flex-direction: column; 
-            height: 100%; 
-            width: 100%; 
-        }
+        .screen { display: none; flex-direction: column; width: 100%; min-height: 100%; }
         .screen.active { display: flex; }
 
-        .instruction-text {
-            text-align: center; color: #666; font-size: 12px; margin-bottom: 5px; flex-shrink: 0;
-        }
+        /* --- HOME SCREEN --- */
+        .home-container { padding: 15px; }
 
-        /* --- GRID MATEMÁTICO --- */
+        /* GRID BOTOES */
         .grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
-            grid-template-rows: repeat(4, 1fr); 
-            gap: 8px; 
-            height: 100%; 
-            min-height: 0;
+            gap: 10px; 
+            margin-bottom: 20px;
         }
         
         .card {
-            border-radius: 12px;
+            border-radius: 10px;
             color: white;
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             justify-content: center;
-            width: 100%; 
-            height: 100%; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15); 
+            height: 100px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
             cursor: pointer; 
             position: relative;
         }
         .card:active { transform: scale(0.98); opacity: 0.9; }
-        .card i { font-size: 28px; margin-bottom: 4px; }
-        .card span { font-weight: bold; font-size: 13px; text-transform: uppercase; }
+        .card i { font-size: 32px; margin-bottom: 5px; }
+        .card span { font-weight: 600; font-size: 12px; text-transform: uppercase; }
 
-        /* Cores */
-        .bg-blue { background-color: #1976D2; } .bg-red { background-color: #D32F2F; }
-        .bg-yellow { background-color: #FBC02D; } .bg-green { background-color: #388E3C; }
-        .bg-gray { background-color: #616161; } .bg-orange { background-color: #F57C00; }
-        .bg-brown { background-color: #E64A19; } .bg-dark { background-color: #455A64; }
+        .bg-blue { background-color: #0277BD; } 
+        .bg-red { background-color: #D32F2F; }
+        .bg-yellow { background-color: #FBC02D; } 
+        .bg-green { background-color: #2E7D32; }
+        .bg-gray { background-color: #455A64; } 
+        .bg-orange { background-color: #EF6C00; }
+        .bg-brown { background-color: #D84315; } 
+        .bg-dark { background-color: #616161; }
 
-        /* --- UI ELEMENTS --- */
-        .scrollable-content { overflow-y: auto; flex: 1; padding: 2px; }
-        .btn-action { background-color: var(--primary); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 15px; margin-top: auto; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; }
-        .btn-action:disabled { background-color: #ccc; cursor: not-allowed; }
-        .form-input { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 15px; }
+        /* --- SEÇÃO DA ASSOCIAÇÃO --- */
+        .association-section {
+            background-color: transparent;
+            padding: 5px 0;
+        }
+        .assoc-title {
+            color: var(--primary);
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .assoc-text {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        .btn-read-more {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* --- MODAL (POP-UP) ATUALIZADO --- */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; top: 0; 
+            width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.5); 
+            justify-content: center; 
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            border-radius: 15px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 85vh; /* Altura máxima para caber na tela */
+            overflow-y: auto; /* Permite rolar o texto longo */
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 10px;
+        }
+        .close-btn:hover { color: black; }
         
-        /* --- RELATÓRIO --- */
-        .report-item { background: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid var(--primary); display: flex; flex-direction: column; }
-        .report-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 5px; }
-        .report-header strong { color: var(--primary); font-size: 15px; }
-        .report-details { display: flex; flex-direction: column; gap: 4px; }
-        .detail-row { display: flex; align-items: center; font-size: 13px; color: #555; }
-        .detail-row i { width: 20px; text-align: center; margin-right: 6px; color: #888; }
-        .report-img { width: 100%; height: 140px; object-fit: cover; border-radius: 6px; margin-top: 8px; border: 1px solid #eee; }
+        /* Estilos do Texto do Modal */
+        .modal h2 { color: var(--primary); font-size: 20px; margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .modal h3 { color: var(--primary); margin-top: 20px; margin-bottom: 8px; font-size: 16px; text-transform: uppercase; background: #e8f5e9; padding: 5px; border-radius: 4px; }
+        .modal p { font-size: 14px; color: #444; line-height: 1.5; margin-bottom: 10px; text-align: justify; }
+        .modal ul { padding-left: 20px; margin-bottom: 10px; }
+        .modal li { font-size: 14px; color: #444; margin-bottom: 5px; }
+        
+        .plan-box {
+            border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: #fafafa;
+        }
+        .plan-title { font-weight: bold; color: #333; font-size: 15px; }
+        .plan-price { color: var(--primary); font-weight: bold; font-size: 16px; margin-top: 5px; display: block;}
 
-        /* --- MAPA --- */
-        .map-container { width: 100%; height: 100%; position: relative; background-color: #e5e3df; display: flex; flex-direction: column; }
-        .map-frame { border:0; width:100%; height:100%; opacity: 0.7; }
-        .search-bar-container { position: absolute; top: 15px; left: 15px; right: 15px; background: white; border-radius: 4px; padding: 0 15px; height: 45px; display: flex; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 2; }
-        .search-bar-container input { border: none; outline: none; flex: 1; font-size: 15px; margin-left: 10px; }
-        .bottom-card-overlay { position: absolute; bottom: 20px; left: 15px; right: 15px; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); z-index: 2; text-align: center; }
-        .gps-button { background-color: #1976D2; color: white; text-align: center; padding: 12px; border-radius: 25px; font-weight: bold; font-size: 13px; text-transform: uppercase; width: 100%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .bairros-list {
+            font-size: 12px; column-count: 2; /* Divide a lista em 2 colunas */
+            color: #555;
+        }
 
-        /* --- RODAPÉ FIXO --- */
+        /* --- TELA ROTAS --- */
+        .map-container {
+            width: 100%; height: 100%; position: relative;
+            background-color: #e5e3df; 
+            display: flex; flex-direction: column;
+            min-height: 500px; 
+        }
+        .map-bg {
+            width: 100%; height: 100%; object-fit: cover; opacity: 0.9;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/ec/OpenStreetMap_im_Dortmunder_Westen.png');
+            background-size: cover; background-position: center;
+        }
+        .map-frame { border:0; width:100%; height:100%; display:none; }
+
+        .search-bar-floating {
+            position: absolute; top: 15px; left: 15px; right: 15px;
+            background: white; border-radius: 4px; height: 48px;
+            display: flex; align-items: center; padding: 0 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 5;
+        }
+        .search-bar-floating input { border: none; outline: none; flex: 1; font-size: 15px; margin-left: 10px; }
+        
+        .toggles-floating {
+            position: absolute; top: 75px; left: 15px; right: 15px;
+            display: flex; gap: 10px; z-index: 5;
+        }
+        .toggle-pill {
+            flex: 1; padding: 10px; border-radius: 20px;
+            font-size: 12px; font-weight: bold; color: white; text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3); cursor: pointer; text-transform: uppercase;
+        }
+        .toggle-active { background-color: #1b5e20; }
+        .toggle-inactive { background-color: #757575; }
+
+        .map-pin-center {
+            position: absolute; top: 45%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #FF5722; font-size: 50px; z-index: 4;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+        }
+
+        .bottom-card-warning {
+            position: absolute; bottom: 20px; left: 15px; right: 15px;
+            background: white; border-radius: 12px; padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 5;
+        }
+        .next-collection-label { font-size: 13px; color: #666; margin-bottom: 5px; }
+        .next-collection-time { font-size: 22px; color: #1b5e20; font-weight: bold; margin-bottom: 5px; }
+        .margin-error { font-size: 11px; color: #999; }
+
+        /* --- TELA RELATÓRIOS --- */
+        .reports-container { padding: 15px; }
+        .chart-box { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        
+        .report-card {
+            background: white; border-radius: 12px; padding: 0;
+            margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--primary);
+            overflow: hidden;
+        }
+        .report-card-content { padding: 15px; }
+        .report-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .report-title { font-size: 18px; font-weight: bold; color: #333; }
+        .report-time { font-size: 12px; color: #888; }
+        .report-sub { font-size: 14px; color: #555; margin-bottom: 10px; }
+        .report-img-container { width: 100%; height: 180px; background: #eee; position: relative; }
+        .report-img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- FORMULÁRIOS --- */
+        .form-container { padding: 20px; }
+        .form-input { width: 100%; padding: 14px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+        .btn-action { background-color: var(--primary); color: white; border: none; padding: 15px; border-radius: 25px; font-size: 16px; margin-top: 20px; width: 100%; cursor: pointer; font-weight: bold; }
+        
+        /* --- RODAPÉ --- */
         nav.bottom-nav { 
             background: white; border-top: 1px solid #ddd; 
             display: flex; justify-content: space-around; align-items: center; 
             position: absolute; bottom: 0; left: 0; width: 100%; 
-            height: 55px; 
-            z-index: 999; padding-bottom: env(safe-area-inset-bottom); 
+            height: 60px; z-index: 999; padding-bottom: env(safe-area-inset-bottom); 
         }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #999; font-size: 10px; cursor: pointer; width: 25%; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
         .nav-item i { font-size: 22px; margin-bottom: 2px; }
+        .nav-item span { font-size: 10px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <div id="app-frame">
         <header>
-            <i class="fas fa-arrow-left back-btn" id="backBtn" onclick="goBack()"></i>
-            <div class="header-title" id="headerTitle">ASSCAVAG</div>
+            <i class="fas fa-arrow-left header-icon" id="backBtn" onclick="goBack()" style="visibility: hidden;"></i>
+            <div class="header-title" id="headerTitle">Tipo de Residuos</div>
+            <i class="fas fa-ellipsis-v header-icon"></i>
         </header>
 
         <main id="main-content">
+            
             <div id="screen-home" class="screen active">
-                <p class="instruction-text">Selecione para aprender e descartar</p>
-                <div class="grid">
-                    <div class="card bg-blue" onclick="openDetails('Papel', '#1976D2', 'fa-file-alt')"><i class="fas fa-file-alt"></i><span>Papel</span></div>
-                    <div class="card bg-red" onclick="openDetails('Plástico', '#D32F2F', 'fa-wine-bottle')"><i class="fas fa-wine-bottle"></i><span>Plástico</span></div>
-                    <div class="card bg-yellow" onclick="openDetails('Metal', '#FBC02D', 'fa-beer')"><i class="fas fa-beer"></i><span>Metal</span></div>
-                    <div class="card bg-green" onclick="openDetails('Vidro', '#388E3C', 'fa-wine-glass')"><i class="fas fa-wine-glass"></i><span>Vidro</span></div>
-                    <div class="card bg-gray" onclick="openDetails('Eletrônicos', '#616161', 'fa-desktop')"><i class="fas fa-desktop"></i><span>Eletrônicos</span></div>
-                    <div class="card bg-orange" onclick="openDetails('Pilhas', '#F57C00', 'fa-battery-full')"><i class="fas fa-battery-full"></i><span>Pilhas</span></div>
-                    <div class="card bg-brown" onclick="openDetails('Óleo Vegetal', '#E64A19', 'fa-tint')"><i class="fas fa-tint"></i><span>Óleo</span></div>
-                    <div class="card bg-dark" onclick="openDetails('Lixo Comum', '#455A64', 'fa-trash')"><i class="fas fa-trash"></i><span>Lixo Comum</span></div>
+                <div class="home-container">
+                    <div class="grid">
+                        <div class="card bg-blue" onclick="openDetails('Papel')"><i class="far fa-file-alt"></i><span>PAPEL</span></div>
+                        <div class="card bg-red" onclick="openDetails('Plástico')"><i class="fas fa-wine-bottle"></i><span>PLÁSTICO</span></div>
+                        <div class="card bg-yellow" onclick="openDetails('Metal')"><i class="fas fa-beer"></i><span>METAL</span></div>
+                        <div class="card bg-green" onclick="openDetails('Vidro')"><i class="fas fa-wine-glass"></i><span>VIDRO</span></div>
+                        <div class="card bg-gray" onclick="openDetails('Eletrônicos')"><i class="fas fa-desktop"></i><span>ELETRÔNICOS</span></div>
+                        <div class="card bg-orange" onclick="openDetails('Pilhas')"><i class="fas fa-battery-full"></i><span>PILHAS E BATERIAS</span></div>
+                        <div class="card bg-brown" onclick="openDetails('Óleo Vegetal')"><i class="fas fa-tint"></i><span>ÓLEO VEGETAL</span></div>
+                        <div class="card bg-dark" onclick="openDetails('Não Reciclável')"><i class="fas fa-apple-alt"></i><span>NÃO RECICLÁVEL</span></div>
+                    </div>
+
+                    <div class="association-section">
+                        <div class="assoc-title">Quem Somos: ASSCAVAG</div>
+                        <p class="assoc-text">
+                            A Associação dos Catadores de Materiais Recicláveis de Várzea Grande (ASSCAVAG) é mais que uma prestadora de serviços; somos agentes de transformação. Ao contratar nossa coleta, seu condomínio gera impacto social direto.
+                        </p>
+                        <button class="btn-read-more" onclick="openModal()">LEIA MAIS</button>
+                    </div>
                 </div>
             </div>
 
             <div id="screen-details" class="screen">
-                <div class="scrollable-content" id="detail-content"></div>
-                <button class="btn-action" style="background-color: #F57C00;" onclick="openCollectScreen()">
-                    <i class="fas fa-camera"></i> REGISTRAR DESCARTE
-                </button>
+                <div class="home-container" id="detail-content"></div>
             </div>
             
             <div id="screen-collect" class="screen">
-                <div class="scrollable-content">
-                    <h2 style="color: #2e7d32; margin-bottom: 10px;">Novo Registro</h2>
-                    <p>Material: <strong id="collect-material-name">---</strong></p>
-                    <input id="empresa" class="form-input" placeholder="Local / Empresa">
+                <div class="form-container">
+                    <h2 style="color: var(--primary); margin-bottom: 20px;">Registrar Coleta</h2>
+                    <p>Material: <strong id="collect-material-name" style="color:#000;">---</strong></p>
+                    
+                    <input id="empresa" class="form-input" placeholder="Nome do local / Empresa">
                     <input id="quantidade" type="number" class="form-input" placeholder="Quantidade (kg)">
                     
                     <input id="camera" type="file" accept="image/*" capture="environment" style="display:none">
-                    <button class="btn-action" style="background:#666; margin-top:15px" onclick="document.getElementById('camera').click()">
-                        <i class="fas fa-camera"></i> TIRAR FOTO
-                    </button>
-                    <img id="preview" style="width:100%; margin-top:10px; display:none; border-radius:8px; border: 2px dashed #ccc; min-height: 150px; object-fit: cover;">
+                    <div style="margin-top:20px; text-align:center;">
+                        <button class="btn-action" style="background:#555; margin-top:0;" onclick="document.getElementById('camera').click()">
+                            <i class="fas fa-camera"></i> TIRAR FOTO
+                        </button>
+                        <img id="preview" style="width:100%; height:200px; object-fit:cover; margin-top:15px; border-radius:8px; display:none; border:2px dashed #ccc;">
+                    </div>
+
+                    <button class="btn-action" onclick="salvarColeta()">SALVAR REGISTRO</button>
                 </div>
-                <button class="btn-action" onclick="salvarColeta()">SALVAR NO BANCO</button>
             </div>
 
             <div id="screen-routes" class="screen">
                 <div class="map-container">
-                    <iframe id="mapa-frame" class="map-frame" src="https://maps.google.com/maps?q=-23.550520,-46.633308&z=12&output=embed" allowfullscreen="" loading="lazy"></iframe>
-                    <div class="search-bar-container"><input type="text" placeholder="Endereço desejado"><i class="fas fa-search" style="color: #666;"></i></div>
-                    <div class="bottom-card-overlay">
-                        <p style="text-align:center; margin-bottom:10px; font-size:14px; color:#444;">Ver localização no mapa?</p>
-                        <button class="gps-button" onclick="buscarLocalizacaoReal()"><i class="fas fa-location-arrow"></i> MINHA LOCALIZAÇÃO</button>
-                        <div id="gps-status" class="gps-status"></div>
+                    <div class="map-bg"></div>
+                    <iframe id="mapa-frame" class="map-frame" src="" allowfullscreen="" loading="lazy"></iframe>
+
+                    <div class="search-bar-floating">
+                        <i class="fas fa-arrow-left" style="color:#333; margin-right:10px;"></i>
+                        <input type="text" placeholder="Digite o endereço desejado">
+                        <i class="fas fa-search" style="color:#333"></i>
+                    </div>
+
+                    <div class="toggles-floating">
+                        <div class="toggle-pill toggle-active">ROTAS</div>
+                        <div class="toggle-pill toggle-inactive">ECOPONTOS</div>
+                    </div>
+
+                    <i class="fas fa-map-marker-alt map-pin-center"></i>
+
+                    <div class="bottom-card-warning" onclick="buscarLocalizacaoReal()">
+                        <div class="next-collection-label">Próxima coleta nesta localização:</div>
+                        <div class="next-collection-time">Segunda-feira | 17h35</div>
+                        <div class="margin-error">*Margem de erro: 20 min</div>
                     </div>
                 </div>
             </div>
 
             <div id="screen-reports" class="screen">
-                <h2 style="color: #2e7d32;">Relatórios</h2>
-                <div style="background:white; padding:10px; border-radius:8px; margin:10px 0;"><canvas id="barChart" height="180"></canvas></div>
-                <div id="listaColetas" class="scrollable-content"><p style="text-align:center; color: #666;">Carregando...</p></div>
+                <div class="reports-container">
+                    <h2 style="color: var(--primary); margin-bottom:15px;">Relatórios</h2>
+                    
+                    <div class="chart-box">
+                        <canvas id="barChart" height="200"></canvas>
+                    </div>
+
+                    <div id="listaColetas">
+                        <p style="text-align:center; color:#999; margin-top:20px;">Carregando dados...</p>
+                    </div>
+                </div>
             </div>
 
             <div id="screen-contact" class="screen">
-                <h2 style="color: #2e7d32;">Contato</h2>
-                <input class="form-input" placeholder="Nome"><textarea class="form-input" style="height:120px" placeholder="Mensagem"></textarea>
-                <button class="btn-action" onclick="alert('Enviado!')">ENVIAR</button>
+                <div class="form-container">
+                    <h2 style="color: var(--primary);">Fale Conosco</h2>
+                    <input class="form-input" placeholder="Seu Nome">
+                    <textarea class="form-input" style="height:120px" placeholder="Sua Mensagem"></textarea>
+                    <button class="btn-action" onclick="alert('Mensagem enviada com sucesso!')">ENVIAR</button>
+                </div>
             </div>
         </main>
 
+        <div id="infoModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal()">×</span>
+                <h2 style="margin-bottom:15px;">Proposta Comercial</h2>
+                
+                <h3>2. O PROBLEMA</h3>
+                <p>A gestão inadequada de resíduos gera multas, insegurança jurídica e danos ambientais. Além disso, a Lei 12.305/2010 (PNRS) exige que grandes geradores e condomínios deem a destinação correta aos seus recicláveis.</p>
+
+                <h3>3. NOSSAS SOLUÇÕES (PLANOS)</h3>
+                <div class="plan-box">
+                    <div class="plan-title">OPÇÃO A - PLANO QUINZENAL</div>
+                    <p>Ideal para volumes moderados. 2 Coletas por mês (A cada 15 dias).</p>
+                    <span class="plan-price">R$ 1.200,00 / mês</span>
+                </div>
+                <div class="plan-box">
+                    <div class="plan-title">OPÇÃO B - PLANO SEMANAL</div>
+                    <p>Ideal para grandes geradores. 4 Coletas por mês (1 vez por semana).</p>
+                    <span class="plan-price">R$ 2.000,00 / mês</span>
+                </div>
+
+                <h3>4. O QUE ESTÁ INCLUSO</h3>
+                <ul>
+                    <li><strong>Logística Completa:</strong> Carregamento, transporte e equipe uniformizada.</li>
+                    <li><strong>Segurança Jurídica:</strong> Emissão mensal da CDR e Nota Fiscal.</li>
+                    <li><strong>Rastreabilidade:</strong> Pesagem, registro e triagem.</li>
+                    <li><strong>Impacto ESG:</strong> Relatórios socioambientais.</li>
+                    <li><strong>Suporte Ágil:</strong> Atendimento via WhatsApp.</li>
+                </ul>
+
+                <h3>5. SERVIÇOS ADICIONAIS</h3>
+                <ul>
+                    <li><strong>Coletas Extras:</strong> R$ 400,00 por coleta adicional.</li>
+                    <li><strong>Resíduos Volumosos:</strong> Remoção de sofás, móveis, etc (cotação à parte).</li>
+                    <li><strong>Higienização:</strong> 1 vez por mês no local de depósito.</li>
+                </ul>
+
+                <h3>6. CONDIÇÕES COMERCIAIS</h3>
+                <p>Faturamento: Boleto (vencimento dia 10).<br>Contrato: Início imediato.</p>
+
+                <h3>7. POR QUE ESCOLHER?</h3>
+                <p>Diferente de empresas comuns, nosso serviço carrega o selo da responsabilidade social. Cuidamos do meio ambiente de Várzea Grande enquanto incluímos trabalhadores no mercado formal.</p>
+
+                <h3>BAIRROS ATENDIDOS</h3>
+                <div class="bairros-list">
+                    Marajoara<br>
+                    Jardim Marajoara I e II<br>
+                    Jardim Paula I e II<br>
+                    Jardim Itororó<br>
+                    São Sebastião<br>
+                    Marechal Rondon<br>
+                    Parque Ind. San Marco<br>
+                    Água Vermelha<br>
+                    Santa Mercedes<br>
+                    Estrela Dalva<br>
+                    Lucimar Campos<br>
+                    Karla Renata<br>
+                    Canelas / Alberto Canelas<br>
+                    Nova Fronteira<br>
+                    São João<br>
+                    Parque Ouro Branco<br>
+                    Jardim Ouro Verde<br>
+                    Frutal de Minas<br>
+                    Dage<br>
+                    Parque Paiaguás<br>
+                    Cohab Ouro Verde<br>
+                    São Simão<br>
+                    Cohab João Baracat<br>
+                    Colinas Verdejantes<br>
+                    Parque Cláudia<br>
+                    Santa Izabel<br>
+                    Cohab Asa Bela / Branca<br>
+                    Renato José dos Santos<br>
+                    Parque Ind. Atlântico<br>
+                    Cohab Santa Izabel<br>
+                    Jardim Eldorado<br>
+                    Cidade de Deus<br>
+                    Alice Gonçalves<br>
+                    Athaíde Ferreira<br>
+                    São Matheus<br>
+                    Parque Sabiá<br>
+                    Parque Arco Íris<br>
+                    Jardim Mariana<br>
+                    Parque Bandeirantes<br>
+                    Estância São Carlos<br>
+                    São Francisco<br>
+                    Parque Centro Oeste<br>
+                    Distrito Formigueiro
+                </div>
+            </div>
+        </div>
+
         <nav class="bottom-nav">
-            <div class="nav-item active" id="nav-home" onclick="navigate('home')"><i class="fas fa-recycle"></i><span>Materiais</span></div>
-            <div class="nav-item" id="nav-routes" onclick="navigate('routes')"><i class="fas fa-truck"></i><span>Coleta</span></div>
-            <div class="nav-item" id="nav-reports" onclick="navigate('reports'); carregarPainel();"><i class="fas fa-chart-pie"></i><span>Relatórios</span></div>
-            <div class="nav-item" id="nav-contact" onclick="navigate('contact')"><i class="fas fa-envelope"></i><span>Contato</span></div>
+            <div class="nav-item active" id="nav-home" onclick="navigate('home')"><i class="fas fa-recycle"></i><span>MATERIAIS</span></div>
+            <div class="nav-item" id="nav-routes" onclick="navigate('routes')"><i class="fas fa-truck"></i><span>COLETA</span></div>
+            <div class="nav-item" id="nav-reports" onclick="navigate('reports'); carregarPainel();"><i class="fas fa-chart-bar"></i><span>RELATÓRIOS</span></div>
+            <div class="nav-item" id="nav-contact" onclick="navigate('contact')"><i class="fas fa-comments"></i><span>CONTATO</span></div>
         </nav>
     </div>
 
     <script>
-        // CONFIGURAÇÃO SUPABASE
+        // --- SUPABASE SETUP ---
         const SUPABASE_URL = 'https://zmshzpogevuzoxlhqfeb.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_AiuJM7hYrKqZRxn_JWYWgA_s_VdqLgt';
         
-        // CORREÇÃO AQUI: Mudamos o nome da variável para não dar conflito
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let supabaseClient;
+        if (window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
 
         let materialSelecionado = "";
         let fotoBase64 = "";
 
-        // DADOS LOCAIS (Para informação)
-        const materialsData = {
-            'Papel': {recyclable:['Jornais','Caixas'], nonRecyclable:['Papel Higiênico'], disposal:'Limpo e seco.'},
-            'Plástico': {recyclable:['PET','Copos'], nonRecyclable:['Cabo panela'], disposal:'Lavar antes.'},
-            'Metal': {recyclable:['Latas'], nonRecyclable:['Esponja aço'], disposal:'Amassar latas.'},
-            'Vidro': {recyclable:['Garrafas'], nonRecyclable:['Espelhos'], disposal:'Cuidado ao quebrar.'},
-            'Eletrônicos': {recyclable:['Celulares'], nonRecyclable:['Lâmpadas'], disposal:'Ecoponto específico.'},
-            'Pilhas': {recyclable:['Baterias'], nonRecyclable:['Vazando'], disposal:'Isolar polos.'},
-            'Óleo Vegetal': {recyclable:['Óleo fritura'], nonRecyclable:['Misturado'], disposal:'Garrafa PET.'},
-            'Lixo Comum': {recyclable:[], nonRecyclable:['Tudo'], disposal:'Aterro sanitário.'}
-        };
+        // MODAL FUNCTIONS
+        function openModal() {
+            document.getElementById("infoModal").style.display = "flex";
+        }
+        function closeModal() {
+            document.getElementById("infoModal").style.display = "none";
+        }
+        window.onclick = function(event) {
+            const modal = document.getElementById("infoModal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
 
         // NAVEGAÇÃO
         function navigate(screenId) {
             document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById('screen-' + screenId).classList.add('active');
+            
             const navBtn = document.getElementById('nav-' + screenId);
             if(navBtn) navBtn.classList.add('active');
-            const headerTitle = document.getElementById('headerTitle');
+
             const backBtn = document.getElementById('backBtn');
             const mainContent = document.getElementById('main-content');
-            
-            // Ajuste de padding para home/rotas ficarem colados na borda
-            if(screenId === 'home' || screenId === 'routes') mainContent.style.padding = "0";
-            else mainContent.style.padding = "10px 12px";
-            mainContent.style.paddingBottom = "60px";
+            const title = document.getElementById('headerTitle');
 
-            if(screenId === 'home') { headerTitle.innerText = 'ASSCAVAG'; backBtn.style.display = 'none'; } 
-            else { 
-                backBtn.style.display = 'block'; 
-                const titles = { routes: 'Rotas', reports: 'Relatórios', contact: 'Contato', details: 'Detalhes', collect: 'Registro' };
-                if(titles[screenId]) headerTitle.innerText = titles[screenId];
+            mainContent.scrollTop = 0;
+
+            if (screenId === 'home') {
+                title.innerText = 'Tipo de Residuos';
+                backBtn.style.visibility = 'hidden';
+                mainContent.style.padding = "0"; 
+            } else if (screenId === 'routes') {
+                title.innerText = 'Rotas e Ecopontos';
+                backBtn.style.visibility = 'visible';
+                mainContent.style.padding = "0"; 
+            } else {
+                title.innerText = 'Tipo de Residuos';
+                backBtn.style.visibility = 'visible';
+                mainContent.style.padding = "0";
             }
         }
         function goBack() { navigate('home'); }
 
-        function openDetails(type, color, icon) {
+        function openDetails(type) {
             materialSelecionado = type;
-            const data = materialsData[type];
             const contentDiv = document.getElementById('detail-content');
             contentDiv.innerHTML = `
-                <div style="background:${color}; color:white; padding:20px; border-radius:12px; text-align:center; margin-bottom:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                    <i class="${icon} fa-3x"></i><h2 style="margin-top:10px">${type}</h2>
-                </div>
-                <div style="background:white; padding:15px; border-radius:12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <h3 style="color:${color}; border-bottom:1px solid #eee; font-size:15px">✅ O que pode</h3><p style="margin:5px 0 10px; font-size:14px">${data.recyclable.join(', ') || 'Nenhum'}</p>
-                    <h3 style="color:#D32F2F; border-bottom:1px solid #eee; font-size:15px">❌ O que não pode</h3><p style="margin:5px 0 10px; font-size:14px">${data.nonRecyclable.join(', ')}</p>
-                    <h3 style="margin-top:10px; border-bottom:1px solid #eee; font-size:15px">ℹ️ Descarte</h3><p style="margin:5px 0; font-size:14px">${data.disposal}</p>
+                <h2 style="color:var(--primary); text-align:center; margin:20px 0;">${type}</h2>
+                <div style="background:white; padding:20px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                    <p>Aqui você encontra informações sobre como reciclar <strong>${type}</strong>.</p>
+                    <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+                    <button class="btn-action" onclick="openCollectScreen()">REGISTRAR ${type.toUpperCase()}</button>
                 </div>
             `;
             navigate('details');
@@ -300,153 +561,133 @@
 
         function openCollectScreen() {
             document.getElementById('collect-material-name').innerText = materialSelecionado;
-            document.getElementById("empresa").value = "";
-            document.getElementById("quantidade").value = "";
-            document.getElementById("preview").style.display = 'none';
-            document.getElementById("preview").src = "";
+            document.getElementById('empresa').value = "";
+            document.getElementById('quantidade').value = "";
+            document.getElementById('preview').style.display = 'none';
             fotoBase64 = "";
             navigate('collect');
         }
 
+        // GPS REAL
         function buscarLocalizacaoReal() {
-            const statusDiv = document.getElementById("gps-status");
-            const mapaFrame = document.getElementById("mapa-frame");
-            if (!navigator.geolocation) { statusDiv.innerHTML = "GPS não suportado."; return; }
-            statusDiv.innerHTML = "Buscando satélites...";
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const long = position.coords.longitude;
-                    statusDiv.innerHTML = "Localização encontrada!";
-                    mapaFrame.src = `https://maps.google.com/maps?q=${lat},${long}&z=15&output=embed`;
-                },
-                (error) => { statusDiv.innerHTML = "Erro ao acessar GPS."; }
-            );
+            const mapFrame = document.getElementById("mapa-frame");
+            const mapBg = document.querySelector(".map-bg");
+            
+            if (!navigator.geolocation) { alert("GPS não suportado."); return; }
+            
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const lat = pos.coords.latitude;
+                const long = pos.coords.longitude;
+                mapBg.style.display = 'none';
+                mapFrame.style.display = 'block';
+                mapFrame.src = `https://maps.google.com/maps?q=${lat},${long}&z=15&output=embed`;
+            }, () => alert("Ative o GPS."));
         }
 
+        // FOTO
         document.getElementById("camera").addEventListener("change", function(e){
             const file = e.target.files[0];
             if(!file) return;
-            if(file.size > 3000000) { alert("Foto muito grande. Use uma menor."); return; }
+            if(file.size > 3000000) { alert("Foto muito grande."); return; }
             const reader = new FileReader();
             reader.onload = function(){
                 fotoBase64 = reader.result;
                 const img = document.getElementById("preview");
-                img.src = fotoBase64; 
-                img.style.display = 'block';
+                img.src = fotoBase64; img.style.display = 'block';
             };
             reader.readAsDataURL(file);
         });
 
-        // --- SALVAR NO SUPABASE ---
+        // SALVAR NO BANCO
         async function salvarColeta(){
+            if(!supabaseClient) return;
             const empresa = document.getElementById("empresa").value;
-            const quantidade = document.getElementById("quantidade").value;
-            
-            if(!empresa || !quantidade){ alert("Preencha todos os campos!"); return; }
+            const qtd = document.getElementById("quantidade").value;
+
+            if(!empresa || !qtd) { alert("Preencha todos os campos."); return; }
 
             const btn = document.querySelector('#screen-collect button:last-child');
-            btn.innerText = 'ENVIANDO...';
-            btn.disabled = true;
+            btn.innerText = 'ENVIANDO...'; btn.disabled = true;
 
             try {
-                // CORREÇÃO: Usando 'quantidade' e 'status' conforme sua imagem do banco
-                // E formatando data apenas como YYYY-MM-DD para aceitar no tipo 'date'
                 const { error } = await supabaseClient
                     .from('coletas')
-                    .insert({ 
-                        material: materialSelecionado, 
-                        empresa: empresa, 
-                        quantidade: parseFloat(quantidade), 
+                    .insert({
+                        material: materialSelecionado,
+                        empresa: empresa,
+                        quantidade: parseFloat(qtd), 
                         foto_base64: fotoBase64,
-                        status: 'pendente', 
-                        data_coleta: new Date().toISOString().split('T')[0] // Data formato Date
+                        status: 'pendente',
+                        data_coleta: new Date().toISOString().split('T')[0]
                     });
 
-                if (error) {
-                    if(error.message.includes("row-level security")) {
-                        throw new Error("ERRO DE PERMISSÃO: Rode 'ALTER TABLE coletas DISABLE ROW LEVEL SECURITY;' no Supabase.");
-                    }
-                    throw error;
-                }
-
-                alert("✅ Salvo com sucesso!");
-                navigate('reports'); 
+                if(error) throw error;
+                alert("Salvo com sucesso!");
+                navigate('reports');
                 carregarPainel();
-
-            } catch (error) {
-                console.error("Erro completo:", error);
-                alert("Erro ao salvar: " + error.message);
+            } catch(e) {
+                alert("Erro ao salvar: " + e.message);
             } finally {
-                btn.innerText = 'SALVAR NO BANCO';
-                btn.disabled = false;
+                btn.innerText = 'SALVAR REGISTRO'; btn.disabled = false;
             }
         }
 
-        // --- LER DO SUPABASE ---
+        // CARREGAR RELATÓRIOS
         async function carregarPainel(){
-             const container = document.getElementById("listaColetas");
-             container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">Atualizando...</p>';
-             
-             try {
-                 // Usa o cliente correto
-                 const { data: dbColetas, error } = await supabaseClient
+            if(!supabaseClient) return;
+            const container = document.getElementById("listaColetas");
+            
+            try {
+                const { data, error } = await supabaseClient
                     .from('coletas')
                     .select('*')
-                    .order('id', { ascending: false });
+                    .order('id', {ascending: false});
 
-                 if (error) throw error;
+                if(error) throw error;
 
-                 container.innerHTML = "";
-                 if (!dbColetas || dbColetas.length === 0) {
-                     container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">Nenhum registro.</p>';
-                     return;
-                 }
+                container.innerHTML = "";
+                let totais = { 'Papel':0, 'Vidro':0, 'Plástico':0 };
 
-                 let totais = { 'Papel': 0, 'Vidro': 0, 'Plástico': 0 };
+                data.forEach(item => {
+                    let peso = parseFloat(item.quantidade) || 0;
+                    if(totais[item.material] !== undefined) totais[item.material] += peso;
 
-                 dbColetas.forEach(item => {
-                     let qtdNum = parseFloat(item.quantidade) || 0;
-                     if (totais[item.material] !== undefined) totais[item.material] += qtdNum;
+                    const imgTag = item.foto_base64 
+                        ? `<div class="report-img-container"><img src="${item.foto_base64}" class="report-img"></div>` 
+                        : '';
 
-                     const imgHtml = item.foto_base64 ? `<img src="${item.foto_base64}" class="report-img">` : '';
-                     
-                     const cardHtml = `
-                        <div class="report-item">
-                            <div class="report-header">
-                                <strong>${item.material}</strong>
-                                <small>ID: ${item.id}</small>
+                    const card = `
+                        <div class="report-card">
+                            <div class="report-card-content">
+                                <div class="report-top">
+                                    <div class="report-title">${item.material}</div>
+                                    <div class="report-time">${item.data_coleta || 'Hoje'}</div>
+                                </div>
+                                <div class="report-sub">${peso}kg • ${item.empresa}</div>
+                                ${imgTag}
                             </div>
-                            <div class="report-details">
-                                <div class="detail-row"><i class="fas fa-weight-hanging"></i> <strong>${qtdNum} kg</strong></div>
-                                <div class="detail-row"><i class="fas fa-user"></i> <span>${item.empresa}</span></div>
-                            </div>
-                            ${imgHtml}
                         </div>
-                     `;
-                     container.innerHTML += cardHtml;
-                 });
+                    `;
+                    container.innerHTML += card;
+                });
 
-                 // Gráfico
-                 if(window.myChartInstance) window.myChartInstance.destroy();
-                 const ctx = document.getElementById('barChart');
-                 window.myChartInstance = new Chart(ctx, {
+                if(window.myChart) window.myChart.destroy();
+                const ctx = document.getElementById('barChart');
+                window.myChart = new Chart(ctx, {
                     type: 'bar',
-                    data: { 
-                        labels: ['Papel','Vidro', 'Plástico'], 
-                        datasets: [{ 
-                            label: 'Kg Coletados', 
-                            data: [totais['Papel'], totais['Vidro'], totais['Plástico']], 
-                            backgroundColor: ['#1976D2', '#388E3C', '#D32F2F'] 
-                        }] 
-                    },
-                    options: { responsive: true, plugins: { legend: { display: false } } }
-                 });
+                    data: {
+                        labels: ['Papel', 'Vidro', 'Plástico'],
+                        datasets: [{
+                            label: 'Kg',
+                            data: [totais['Papel'], totais['Vidro'], totais['Plástico']],
+                            backgroundColor: ['#1976D2', '#388E3C', '#D32F2F']
+                        }]
+                    }
+                });
 
-             } catch (error) {
-                 console.error(error);
-                 container.innerHTML = '<p style="text-align:center; color:red;">Erro ao carregar dados.</p>';
-             }
+            } catch(e) {
+                container.innerHTML = "Erro ao carregar.";
+            }
         }
     </script>
 </body>
