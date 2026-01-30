@@ -16,11 +16,13 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Roboto, Helvetica, Arial, sans-serif; }
         
+        /* TRAVA DE TELA CHEIA (SEM ROLAGEM GERAL) */
         body { 
             background-color: #333; 
             display: flex; 
             justify-content: center; 
             height: 100vh; 
+            width: 100%;
             overflow: hidden; 
         }
 
@@ -37,7 +39,7 @@
             #app-frame { max-width: 412px; }
         }
 
-        /* --- HEADER --- */
+        /* --- 1. CABEÇALHO FINO --- */
         header {
             background-color: var(--primary); 
             color: white; 
@@ -53,31 +55,32 @@
         .header-title { font-size: 19px; font-weight: 600; }
         .back-btn { position: absolute; left: 16px; color: white; cursor: pointer; font-size: 20px; display: none; }
 
-        /* --- MAIN --- */
+        /* --- 2. ÁREA PRINCIPAL (AUTO-AJUSTÁVEL) --- */
         main { 
-            flex: 1; 
+            flex: 1; /* Ocupa todo o espaço vertical disponível */
             display: flex; 
             flex-direction: column; 
-            padding: 12px; 
-            overflow-y: auto; 
+            padding: 10px 12px; 
+            overflow: hidden; /* Sem scroll na home */
             position: relative;
         }
-        main.no-padding { padding: 0; overflow: hidden; }
+        main.no-padding { padding: 0; }
 
-        .screen { display: none; flex-direction: column; width: 100%; height: 100%; }
+        .screen { display: none; height: 100%; width: 100%; flex-direction: column; }
         .screen.active { display: flex; }
 
         .instruction-text {
-            text-align: center; color: #666; font-size: 13px; margin-bottom: 12px; flex-shrink: 0;
+            text-align: center; color: #666; font-size: 13px; margin-bottom: 8px; flex-shrink: 0;
         }
 
-        /* --- GRID AJUSTADO (CAIXAS MENORES) --- */
+        /* --- 3. GRID MATEMÁTICO (PREENCHE A TELA) --- */
         .grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
-            /* Altura automática baseada no conteúdo, alinhada ao topo */
-            align-content: start; 
+            grid-template-rows: repeat(4, 1fr); /* 4 Linhas de altura igual */
             gap: 10px; 
+            flex: 1; /* Estica até o rodapé */
+            min-height: 0;
         }
         
         .card {
@@ -87,15 +90,15 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center;
-            /* REDUZIDO O TAMANHO DA CAIXA AQUI */
-            height: 110px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15); 
+            width: 100%; 
+            height: 100%; /* Preenche a célula do grid */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
             cursor: pointer; 
             position: relative;
         }
         .card:active { transform: scale(0.98); opacity: 0.9; }
-        .card i { font-size: 30px; margin-bottom: 6px; } /* Ícones levemente ajustados */
-        .card span { font-weight: bold; font-size: 14px; text-transform: uppercase; }
+        .card i { font-size: 32px; margin-bottom: 5px; } /* Ícone ajustado */
+        .card span { font-weight: bold; font-size: 13px; text-transform: uppercase; }
 
         /* Cores */
         .bg-blue { background-color: #1976D2; }
@@ -107,13 +110,12 @@
         .bg-brown { background-color: #E64A19; }
         .bg-dark { background-color: #455A64; }
 
-        /* --- TELA ROTAS COM GPS --- */
+        /* --- TELA ROTAS / GPS --- */
         .map-container {
             width: 100%; height: 100%; position: relative;
-            background-color: #e5e3df; /* Cor de fundo do Maps */
+            background-color: #e5e3df;
             display: flex; flex-direction: column;
         }
-        /* Iframe para simular o visual do mapa */
         .map-frame { border:0; width:100%; height:100%; opacity: 0.7; }
 
         .search-bar-container {
@@ -135,7 +137,6 @@
         .toggle-active { background-color: #1b5e20; }
         .toggle-inactive { background-color: #757575; }
 
-        /* Card Inferior do GPS */
         .bottom-card-overlay {
             position: absolute; bottom: 20px; left: 15px; right: 15px;
             background: white; border-radius: 12px; padding: 20px;
@@ -144,9 +145,9 @@
         .bottom-card-text { font-size: 14px; color: #444; margin-bottom: 15px; line-height: 1.4; }
         
         .gps-button {
-            background-color: #1976D2; /* Azul Maps */
+            background-color: #1976D2; 
             color: white; text-align: center;
-            padding: 14px; border-radius: 25px; font-weight: bold; font-size: 14px;
+            padding: 12px; border-radius: 25px; font-weight: bold; font-size: 14px;
             text-transform: uppercase; width: 100%; border: none; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
@@ -161,10 +162,11 @@
         }
         .form-input { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
         
-        /* NAV BAR */
+        /* --- 4. RODAPÉ FIXO --- */
         nav.bottom-nav {
             background: white; border-top: 1px solid #ddd; display: flex; justify-content: space-around; 
-            height: 60px; flex-shrink: 0; z-index: 10; align-items: center;
+            height: 60px; flex-shrink: 0; z-index: 20; align-items: center;
+            padding-bottom: env(safe-area-inset-bottom); /* Ajuste iPhone */
         }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #757575; font-size: 10px; cursor: pointer; width: 25%; }
         .nav-item.active { color: var(--primary); }
@@ -217,19 +219,12 @@
             <div id="screen-routes" class="screen">
                 <div class="map-container">
                     <iframe class="map-frame" src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d14631.5!2d-46.6!3d-23.55!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1spt-BR!2sbr!4v1600000000000!5m2!1spt-BR!2sbr" allowfullscreen="" loading="lazy"></iframe>
-
                     <div class="search-bar-container"><input type="text" placeholder="Endereço desejado"><i class="fas fa-search" style="color: #666;"></i></div>
-                    
-                    <div class="toggle-container">
-                        <div class="toggle-btn toggle-active">ROTAS</div>
-                        <div class="toggle-btn toggle-inactive">ECOPONTOS</div>
-                    </div>
-
+                    <div class="toggle-container"><div class="toggle-btn toggle-active">ROTAS</div><div class="toggle-btn toggle-inactive">ECOPONTOS</div></div>
                     <div class="bottom-card-overlay">
-                        <p class="bottom-card-text">Deseja encontrar o ponto de coleta mais próximo da sua posição atual?</p>
-                        
+                        <p class="bottom-card-text">Deseja encontrar o ponto de coleta mais próximo?</p>
                         <button class="gps-button" onclick="buscarLocalizacaoReal()">
-                            <i class="fas fa-location-arrow"></i> ENCONTRAR MINHA LOCALIZAÇÃO
+                            <i class="fas fa-location-arrow"></i> USAR MEU GPS
                         </button>
                         <div id="gps-status" class="gps-status"></div>
                     </div>
@@ -319,30 +314,24 @@
             navigate('collect');
         }
 
-        // --- FUNÇÃO DE GPS REAL ---
+        /* FUNÇÃO GPS REAL */
         function buscarLocalizacaoReal() {
             const statusDiv = document.getElementById("gps-status");
-            
             if (!navigator.geolocation) {
-                statusDiv.innerHTML = "Seu navegador não suporta geolocalização.";
-                return;
+                statusDiv.innerHTML = "GPS não suportado."; return;
             }
-
-            statusDiv.innerHTML = "Aguardando permissão do GPS...";
-
+            statusDiv.innerHTML = "Aguardando GPS...";
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const lat = position.coords.latitude;
                     const long = position.coords.longitude;
-                    statusDiv.innerHTML = "Localização encontrada! Abrindo mapa...";
-                    
-                    // Abre o Google Maps com as coordenadas exatas
+                    statusDiv.innerHTML = "Localizado! Abrindo Maps...";
                     setTimeout(() => {
                         window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${long}`, '_blank');
                     }, 1000);
                 },
                 (error) => {
-                    statusDiv.innerHTML = "Erro ao obter localização. Verifique se o GPS está ativado.";
+                    statusDiv.innerHTML = "Erro ao obter localização.";
                     console.error("Erro GPS:", error);
                 }
             );
@@ -366,7 +355,6 @@
             if(!empresa || !quantidade){ alert("Preencha todos os campos!"); return; }
             const btn = document.querySelector('#screen-collect button:last-child');
             btn.innerHTML = 'Salvando...';
-            
             setTimeout(() => {
                 alert("Coleta registrada com sucesso!"); 
                 btn.innerHTML = 'SALVAR';
