@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tipo de Residuos</title>
+    <title>ReciclaLogo</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -77,7 +77,6 @@
         /* --- HOME SCREEN --- */
         .home-container { padding: 15px; }
 
-        /* GRID BOTOES */
         .grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
@@ -141,17 +140,18 @@
             text-transform: uppercase;
         }
 
-        /* --- MODAL (POP-UP) ATUALIZADO --- */
+        /* --- MODAL --- */
         .modal {
             display: none; 
             position: fixed; 
-            z-index: 1000; 
+            z-index: 2000; 
             left: 0; top: 0; 
             width: 100%; height: 100%; 
             background-color: rgba(0,0,0,0.5); 
             justify-content: center; 
             align-items: center;
             padding: 20px;
+            backdrop-filter: blur(2px);
         }
         .modal-content {
             background-color: #fefefe;
@@ -159,8 +159,8 @@
             padding: 20px;
             width: 100%;
             max-width: 400px;
-            max-height: 85vh; /* Altura máxima para caber na tela */
-            overflow-y: auto; /* Permite rolar o texto longo */
+            max-height: 85vh; 
+            overflow-y: auto; 
             position: relative;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
@@ -174,25 +174,17 @@
             right: 20px;
             top: 10px;
         }
-        .close-btn:hover { color: black; }
         
-        /* Estilos do Texto do Modal */
         .modal h2 { color: var(--primary); font-size: 20px; margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         .modal h3 { color: var(--primary); margin-top: 20px; margin-bottom: 8px; font-size: 16px; text-transform: uppercase; background: #e8f5e9; padding: 5px; border-radius: 4px; }
         .modal p { font-size: 14px; color: #444; line-height: 1.5; margin-bottom: 10px; text-align: justify; }
         .modal ul { padding-left: 20px; margin-bottom: 10px; }
         .modal li { font-size: 14px; color: #444; margin-bottom: 5px; }
         
-        .plan-box {
-            border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: #fafafa;
-        }
+        .plan-box { border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: #fafafa; }
         .plan-title { font-weight: bold; color: #333; font-size: 15px; }
         .plan-price { color: var(--primary); font-weight: bold; font-size: 16px; margin-top: 5px; display: block;}
-
-        .bairros-list {
-            font-size: 12px; column-count: 2; /* Divide a lista em 2 colunas */
-            color: #555;
-        }
+        .bairros-list { font-size: 12px; column-count: 2; color: #555; line-height: 1.6; }
 
         /* --- TELA ROTAS --- */
         .map-container {
@@ -235,6 +227,7 @@
             filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
         }
 
+        /* CARD DE AVISO (ROTAS) */
         .bottom-card-warning {
             position: absolute; bottom: 20px; left: 15px; right: 15px;
             background: white; border-radius: 12px; padding: 20px;
@@ -243,11 +236,50 @@
         .next-collection-label { font-size: 13px; color: #666; margin-bottom: 5px; }
         .next-collection-time { font-size: 22px; color: #1b5e20; font-weight: bold; margin-bottom: 5px; }
         .margin-error { font-size: 11px; color: #999; }
+        
+        /* CARD DE ECOPONTO (ATUALIZADO PARA LISTA) */
+        .bottom-card-ecoponto {
+            position: absolute; bottom: 20px; left: 15px; right: 15px;
+            background: white; border-radius: 12px; padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 5;
+            border-left: 5px solid #FA7B17;
+            display: none; 
+            max-height: 250px; overflow-y: auto; /* Scroll se tiver muitos */
+        }
+        
+        .ecoponto-item {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .ecoponto-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        
+        .ecoponto-info { flex: 1; }
+        .ecoponto-title { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 2px; }
+        .ecoponto-address { font-size: 12px; color: #666; line-height: 1.3; }
 
-        /* --- TELA RELATÓRIOS --- */
+        .btn-gps-large {
+            background-color: var(--primary); color: white; border: none;
+            width: 100%; padding: 12px; margin-top: 10px; border-radius: 25px;
+            font-weight: bold; font-size: 14px; text-transform: uppercase;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        
+        /* Botão pequeno de rota */
+        .btn-route-small {
+            background-color: #FA7B17; color: white; border: none;
+            padding: 8px 12px; border-radius: 20px;
+            font-weight: bold; font-size: 11px; text-transform: uppercase;
+            cursor: pointer; margin-left: 10px; white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* --- RELATÓRIOS --- */
         .reports-container { padding: 15px; }
         .chart-box { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        
         .report-card {
             background: white; border-radius: 12px; padding: 0;
             margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -262,12 +294,11 @@
         .report-img-container { width: 100%; height: 180px; background: #eee; position: relative; }
         .report-img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* --- FORMULÁRIOS --- */
+        /* --- GERAL --- */
         .form-container { padding: 20px; }
         .form-input { width: 100%; padding: 14px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
         .btn-action { background-color: var(--primary); color: white; border: none; padding: 15px; border-radius: 25px; font-size: 16px; margin-top: 20px; width: 100%; cursor: pointer; font-weight: bold; }
         
-        /* --- RODAPÉ --- */
         nav.bottom-nav { 
             background: white; border-top: 1px solid #ddd; 
             display: flex; justify-content: space-around; align-items: center; 
@@ -285,7 +316,7 @@
     <div id="app-frame">
         <header>
             <i class="fas fa-arrow-left header-icon" id="backBtn" onclick="goBack()" style="visibility: hidden;"></i>
-            <div class="header-title" id="headerTitle">Tipo de Residuos</div>
+            <div class="header-title" id="headerTitle">Tipo de Residuo</div>
             <i class="fas fa-ellipsis-v header-icon"></i>
         </header>
 
@@ -307,9 +338,9 @@
                     <div class="association-section">
                         <div class="assoc-title">Quem Somos: ASSCAVAG</div>
                         <p class="assoc-text">
-                            A Associação dos Catadores de Materiais Recicláveis de Várzea Grande (ASSCAVAG) é mais que uma prestadora de serviços; somos agentes de transformação. Ao contratar nossa coleta, seu condomínio gera impacto social direto.
+                            A Associação dos Catadores de Materiais Recicláveis de Várzea Grande (ASSCAVAG) é mais que uma prestadora de serviços; somos agentes de transformação.
                         </p>
-                        <button class="btn-read-more" onclick="openModal()">LEIA MAIS</button>
+                        <button class="btn-read-more" onclick="openModal()">LEIA MAIS SOBRE OS PLANOS</button>
                     </div>
                 </div>
             </div>
@@ -322,18 +353,13 @@
                 <div class="form-container">
                     <h2 style="color: var(--primary); margin-bottom: 20px;">Registrar Coleta</h2>
                     <p>Material: <strong id="collect-material-name" style="color:#000;">---</strong></p>
-                    
                     <input id="empresa" class="form-input" placeholder="Nome do local / Empresa">
                     <input id="quantidade" type="number" class="form-input" placeholder="Quantidade (kg)">
-                    
                     <input id="camera" type="file" accept="image/*" capture="environment" style="display:none">
                     <div style="margin-top:20px; text-align:center;">
-                        <button class="btn-action" style="background:#555; margin-top:0;" onclick="document.getElementById('camera').click()">
-                            <i class="fas fa-camera"></i> TIRAR FOTO
-                        </button>
+                        <button class="btn-action" style="background:#555; margin-top:0;" onclick="document.getElementById('camera').click()"><i class="fas fa-camera"></i> TIRAR FOTO</button>
                         <img id="preview" style="width:100%; height:200px; object-fit:cover; margin-top:15px; border-radius:8px; display:none; border:2px dashed #ccc;">
                     </div>
-
                     <button class="btn-action" onclick="salvarColeta()">SALVAR REGISTRO</button>
                 </div>
             </div>
@@ -341,40 +367,60 @@
             <div id="screen-routes" class="screen">
                 <div class="map-container">
                     <div class="map-bg"></div>
-                    <iframe id="mapa-frame" class="map-frame" src="" allowfullscreen="" loading="lazy"></iframe>
+                    <iframe id="mapa-frame" class="map-frame" src="" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
 
-                    <div class="search-bar-floating">
+                    <div id="search-box" class="search-bar-floating">
                         <i class="fas fa-arrow-left" style="color:#333; margin-right:10px;"></i>
                         <input type="text" placeholder="Digite o endereço desejado">
                         <i class="fas fa-search" style="color:#333"></i>
                     </div>
 
                     <div class="toggles-floating">
-                        <div class="toggle-pill toggle-active">ROTAS</div>
-                        <div class="toggle-pill toggle-inactive">ECOPONTOS</div>
+                        <div id="btn-rotas" class="toggle-pill toggle-active" onclick="alternarModoMapa('rotas')">ROTAS</div>
+                        <div id="btn-ecopontos" class="toggle-pill toggle-inactive" onclick="alternarModoMapa('ecopontos')">ECOPONTOS</div>
                     </div>
 
-                    <i class="fas fa-map-marker-alt map-pin-center"></i>
+                    <i id="static-pin" class="fas fa-map-marker-alt map-pin-center"></i>
 
-                    <div class="bottom-card-warning" onclick="buscarLocalizacaoReal()">
-                        <div class="next-collection-label">Próxima coleta nesta localização:</div>
-                        <div class="next-collection-time">Segunda-feira | 17h35</div>
-                        <div class="margin-error">*Margem de erro: 20 min</div>
+                    <div id="card-rotas" class="bottom-card-warning">                                             
+                        <button class="btn-gps-large" onclick="buscarLocalizacaoReal()">
+                            <i class="fas fa-location-arrow"></i> ATIVAR GPS DO CELULAR
+                        </button>
+                        <div id="gps-status" style="text-align:center; font-size:11px; margin-top:5px; color:#555;"></div>
                     </div>
+
+                    <div id="card-ecoponto" class="bottom-card-ecoponto">
+                        <h3 style="color:#1b5e20; margin-bottom:10px; font-size:16px;">Pontos de Coleta:</h3>
+                        
+                        <div class="ecoponto-item">
+                            <div class="ecoponto-info">
+                                <div class="ecoponto-title">Comper Supermercado</div>
+                                <div class="ecoponto-address">Av. Gov. Júlio Campos, 5730</div>
+                            </div>
+                            <button class="btn-route-small" onclick="tracarRota(-15.640665, -56.173133)">
+                                <i class="fas fa-directions"></i> ROTA
+                            </button>
+                        </div>
+
+                        <div class="ecoponto-item">
+                            <div class="ecoponto-info">
+                                <div class="ecoponto-title">Supermercado Bom Gosto</div>
+                                <div class="ecoponto-address">Av. Júlio Domingos de Campos, 6100</div>
+                            </div>
+                            <button class="btn-route-small" onclick="tracarRota(-15.646813, -56.149494)">
+                                <i class="fas fa-directions"></i> ROTA
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
             <div id="screen-reports" class="screen">
                 <div class="reports-container">
                     <h2 style="color: var(--primary); margin-bottom:15px;">Relatórios</h2>
-                    
-                    <div class="chart-box">
-                        <canvas id="barChart" height="200"></canvas>
-                    </div>
-
-                    <div id="listaColetas">
-                        <p style="text-align:center; color:#999; margin-top:20px;">Carregando dados...</p>
-                    </div>
+                    <div class="chart-box"><canvas id="barChart" height="200"></canvas></div>
+                    <div id="listaColetas"><p style="text-align:center; color:#999; margin-top:20px;">Carregando dados...</p></div>
                 </div>
             </div>
 
@@ -391,12 +437,10 @@
         <div id="infoModal" class="modal">
             <div class="modal-content">
                 <span class="close-btn" onclick="closeModal()">×</span>
-                <h2 style="margin-bottom:15px;">Proposta Comercial</h2>
-                
-                <h3>2. O PROBLEMA</h3>
-                <p>A gestão inadequada de resíduos gera multas, insegurança jurídica e danos ambientais. Além disso, a Lei 12.305/2010 (PNRS) exige que grandes geradores e condomínios deem a destinação correta aos seus recicláveis.</p>
-
-                <h3>3. NOSSAS SOLUÇÕES (PLANOS)</h3>
+                <h2 style="margin-bottom:15px;">Proposta ASSCAVAG</h2>
+                <h3>O PROBLEMA</h3>
+                <p>A gestão inadequada de resíduos gera multas e danos ambientais. A Lei 12.305/2010 (PNRS) exige que condomínios destinem corretamente seus recicláveis.</p>
+                <h3>NOSSAS SOLUÇÕES</h3>
                 <div class="plan-box">
                     <div class="plan-title">OPÇÃO A - PLANO QUINZENAL</div>
                     <p>Ideal para volumes moderados. 2 Coletas por mês (A cada 15 dias).</p>
@@ -407,74 +451,15 @@
                     <p>Ideal para grandes geradores. 4 Coletas por mês (1 vez por semana).</p>
                     <span class="plan-price">R$ 2.000,00 / mês</span>
                 </div>
-
-                <h3>4. O QUE ESTÁ INCLUSO</h3>
+                <h3>O QUE ESTÁ INCLUSO</h3>
                 <ul>
-                    <li><strong>Logística Completa:</strong> Carregamento, transporte e equipe uniformizada.</li>
-                    <li><strong>Segurança Jurídica:</strong> Emissão mensal da CDR e Nota Fiscal.</li>
-                    <li><strong>Rastreabilidade:</strong> Pesagem, registro e triagem.</li>
-                    <li><strong>Impacto ESG:</strong> Relatórios socioambientais.</li>
-                    <li><strong>Suporte Ágil:</strong> Atendimento via WhatsApp.</li>
+                    <li><strong>Logística:</strong> Transporte e equipe.</li>
+                    <li><strong>Segurança:</strong> Emissão de CDR e Nota Fiscal.</li>
+                    <li><strong>Rastreabilidade:</strong> Pesagem e triagem.</li>
                 </ul>
-
-                <h3>5. SERVIÇOS ADICIONAIS</h3>
-                <ul>
-                    <li><strong>Coletas Extras:</strong> R$ 400,00 por coleta adicional.</li>
-                    <li><strong>Resíduos Volumosos:</strong> Remoção de sofás, móveis, etc (cotação à parte).</li>
-                    <li><strong>Higienização:</strong> 1 vez por mês no local de depósito.</li>
-                </ul>
-
-                <h3>6. CONDIÇÕES COMERCIAIS</h3>
-                <p>Faturamento: Boleto (vencimento dia 10).<br>Contrato: Início imediato.</p>
-
-                <h3>7. POR QUE ESCOLHER?</h3>
-                <p>Diferente de empresas comuns, nosso serviço carrega o selo da responsabilidade social. Cuidamos do meio ambiente de Várzea Grande enquanto incluímos trabalhadores no mercado formal.</p>
-
                 <h3>BAIRROS ATENDIDOS</h3>
                 <div class="bairros-list">
-                    Marajoara<br>
-                    Jardim Marajoara I e II<br>
-                    Jardim Paula I e II<br>
-                    Jardim Itororó<br>
-                    São Sebastião<br>
-                    Marechal Rondon<br>
-                    Parque Ind. San Marco<br>
-                    Água Vermelha<br>
-                    Santa Mercedes<br>
-                    Estrela Dalva<br>
-                    Lucimar Campos<br>
-                    Karla Renata<br>
-                    Canelas / Alberto Canelas<br>
-                    Nova Fronteira<br>
-                    São João<br>
-                    Parque Ouro Branco<br>
-                    Jardim Ouro Verde<br>
-                    Frutal de Minas<br>
-                    Dage<br>
-                    Parque Paiaguás<br>
-                    Cohab Ouro Verde<br>
-                    São Simão<br>
-                    Cohab João Baracat<br>
-                    Colinas Verdejantes<br>
-                    Parque Cláudia<br>
-                    Santa Izabel<br>
-                    Cohab Asa Bela / Branca<br>
-                    Renato José dos Santos<br>
-                    Parque Ind. Atlântico<br>
-                    Cohab Santa Izabel<br>
-                    Jardim Eldorado<br>
-                    Cidade de Deus<br>
-                    Alice Gonçalves<br>
-                    Athaíde Ferreira<br>
-                    São Matheus<br>
-                    Parque Sabiá<br>
-                    Parque Arco Íris<br>
-                    Jardim Mariana<br>
-                    Parque Bandeirantes<br>
-                    Estância São Carlos<br>
-                    São Francisco<br>
-                    Parque Centro Oeste<br>
-                    Distrito Formigueiro
+                    Marajoara<br>Jardim Marajoara I e II<br>Jardim Paula I e II<br>São Sebastião<br>Marechal Rondon<br>Água Vermelha<br>Santa Mercedes<br>Estrela Dalva<br>Lucimar Campos<br>Karla Renata<br>Canelas<br>Nova Fronteira<br>São João<br>Parque Ouro Branco<br>Jardim Ouro Verde<br>Parque Paiaguás<br>Cohab Ouro Verde<br>São Simão<br>Cohab João Baracat<br>Santa Izabel<br>Cohab Asa Bela/Branca<br>Cidade de Deus<br>São Matheus<br>Parque Sabiá<br>Parque Arco Íris<br>Jardim Mariana<br>Parque Bandeirantes<br>São Francisco<br>Parque Centro Oeste<br>Distrito Formigueiro
                 </div>
             </div>
         </div>
@@ -500,19 +485,10 @@
         let materialSelecionado = "";
         let fotoBase64 = "";
 
-        // MODAL FUNCTIONS
-        function openModal() {
-            document.getElementById("infoModal").style.display = "flex";
-        }
-        function closeModal() {
-            document.getElementById("infoModal").style.display = "none";
-        }
-        window.onclick = function(event) {
-            const modal = document.getElementById("infoModal");
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
+        // MODAL
+        function openModal() { document.getElementById("infoModal").style.display = "flex"; }
+        function closeModal() { document.getElementById("infoModal").style.display = "none"; }
+        window.onclick = function(event) { if (event.target == document.getElementById("infoModal")) closeModal(); }
 
         // NAVEGAÇÃO
         function navigate(screenId) {
@@ -530,7 +506,7 @@
             mainContent.scrollTop = 0;
 
             if (screenId === 'home') {
-                title.innerText = 'Tipo de Residuos';
+                title.innerText = 'ReciclaLogo';
                 backBtn.style.visibility = 'hidden';
                 mainContent.style.padding = "0"; 
             } else if (screenId === 'routes') {
@@ -538,7 +514,7 @@
                 backBtn.style.visibility = 'visible';
                 mainContent.style.padding = "0"; 
             } else {
-                title.innerText = 'Tipo de Residuos';
+                title.innerText = 'ReciclaLogo';
                 backBtn.style.visibility = 'visible';
                 mainContent.style.padding = "0";
             }
@@ -568,20 +544,100 @@
             navigate('collect');
         }
 
-        // GPS REAL
+        // --- ALTERNAR ABAS ---
+        function alternarModoMapa(modo) {
+            const btnRotas = document.getElementById('btn-rotas');
+            const btnEcopontos = document.getElementById('btn-ecopontos');
+            const mapFrame = document.getElementById('mapa-frame');
+            const mapBg = document.querySelector(".map-bg");
+            const staticPin = document.getElementById('static-pin');
+            const cardRotas = document.getElementById('card-rotas');
+            const cardEcoponto = document.getElementById('card-ecoponto');
+            const searchBox = document.getElementById('search-box');
+
+            if (modo === 'ecopontos') {
+                btnRotas.className = 'toggle-pill toggle-inactive';
+                btnEcopontos.className = 'toggle-pill toggle-active';
+
+                mapBg.style.display = 'none';
+                staticPin.style.display = 'none';
+                searchBox.style.display = 'none';
+                
+                // Visão Geral de Várzea Grande
+                mapFrame.style.display = 'block';
+                mapFrame.src = "https://maps.google.com/maps?q=-15.640665,-56.173133&z=15&output=embed";
+
+                cardRotas.style.display = 'none';
+                cardEcoponto.style.display = 'block';
+
+            } else {
+                btnEcopontos.className = 'toggle-pill toggle-inactive';
+                btnRotas.className = 'toggle-pill toggle-active';
+
+                mapBg.style.display = 'block';
+                mapFrame.style.display = 'none';
+                staticPin.style.display = 'block';
+                searchBox.style.display = 'flex';
+
+                cardEcoponto.style.display = 'none';
+                cardRotas.style.display = 'block';
+            }
+        }
+
+        // --- GPS REAL ---
         function buscarLocalizacaoReal() {
             const mapFrame = document.getElementById("mapa-frame");
             const mapBg = document.querySelector(".map-bg");
+            const pinStatic = document.getElementById("static-pin");
+            const statusDiv = document.getElementById("gps-status");
             
             if (!navigator.geolocation) { alert("GPS não suportado."); return; }
+            if(statusDiv) statusDiv.innerText = "Buscando satélites...";
             
             navigator.geolocation.getCurrentPosition((pos) => {
                 const lat = pos.coords.latitude;
                 const long = pos.coords.longitude;
+                
+                mapBg.style.display = 'none';
+                if(pinStatic) pinStatic.style.display = 'none';
+                mapFrame.style.display = 'block';
+                if(statusDiv) statusDiv.innerText = "Localizado!";
+                
+                mapFrame.src = `https://maps.google.com/maps?q=${lat},${long}&z=16&output=embed`;
+            }, () => { alert("Erro GPS."); }, {enableHighAccuracy: true});
+        }
+
+        // --- FUNÇÃO DE TRAÇAR ROTA GENÉRICA ---
+        function tracarRota(destLat, destLng) {
+            if (!navigator.geolocation) { 
+                alert("GPS necessário para traçar rota."); 
+                return; 
+            }
+
+            // Aviso visual
+            const btn = event.currentTarget; // Botão que foi clicado
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const userLat = pos.coords.latitude;
+                const userLng = pos.coords.longitude;
+
+                const mapFrame = document.getElementById('mapa-frame');
+                const mapBg = document.querySelector('.map-bg');
+                
                 mapBg.style.display = 'none';
                 mapFrame.style.display = 'block';
-                mapFrame.src = `https://maps.google.com/maps?q=${lat},${long}&z=15&output=embed`;
-            }, () => alert("Ative o GPS."));
+
+                // URL Para Rota em Iframe
+                mapFrame.src = `https://maps.google.com/maps?saddr=${userLat},${userLng}&daddr=${destLat},${destLng}&output=embed`;
+
+                btn.innerHTML = originalText; // Volta texto normal
+
+            }, (err) => {
+                alert("Erro ao pegar sua localização.");
+                btn.innerHTML = originalText;
+            }, {enableHighAccuracy: true});
         }
 
         // FOTO
@@ -598,7 +654,7 @@
             reader.readAsDataURL(file);
         });
 
-        // SALVAR NO BANCO
+        // SALVAR
         async function salvarColeta(){
             if(!supabaseClient) return;
             const empresa = document.getElementById("empresa").value;
@@ -632,7 +688,7 @@
             }
         }
 
-        // CARREGAR RELATÓRIOS
+        // CARREGAR
         async function carregarPainel(){
             if(!supabaseClient) return;
             const container = document.getElementById("listaColetas");
@@ -661,9 +717,12 @@
                             <div class="report-card-content">
                                 <div class="report-top">
                                     <div class="report-title">${item.material}</div>
-                                    <div class="report-time">${item.data_coleta || 'Hoje'}</div>
+                                    <div class="report-time">${item.data_coleta || 'Hoje'}</div>                                
                                 </div>
-                                <div class="report-sub">${peso}kg • ${item.empresa}</div>
+                               <div class="report-sub">
+                               Nome do Local / Empresa: ${item.empresa}<br>
+                               Quantidade (kg): ${peso}
+                              </div>
                                 ${imgTag}
                             </div>
                         </div>
