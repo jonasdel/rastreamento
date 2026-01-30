@@ -20,7 +20,7 @@
             background-color: #333; 
             display: flex; 
             justify-content: center; 
-            height: 100vh; /* Ocupa 100% da tela */
+            height: 100vh; 
             overflow: hidden; 
         }
 
@@ -34,14 +34,14 @@
         }
 
         @media (min-width: 500px) {
-            #app-frame { max-width: 412px; } /* Largura de celular */
+            #app-frame { max-width: 412px; }
         }
 
-        /* --- 1. CABEÇALHO COMPACTO --- */
+        /* --- HEADER --- */
         header {
             background-color: var(--primary); 
             color: white; 
-            height: 56px; /* Altura padrão Android */
+            height: 56px; 
             display: flex;
             align-items: center; 
             justify-content: center;
@@ -53,38 +53,32 @@
         .header-title { font-size: 20px; font-weight: 600; }
         .back-btn { position: absolute; left: 16px; color: white; cursor: pointer; font-size: 20px; display: none; }
 
-        /* --- 2. ÁREA PRINCIPAL --- */
+        /* --- MAIN --- */
         main { 
-            flex: 1; /* Ocupa todo o espaço sobrando */
+            flex: 1; 
             display: flex; 
             flex-direction: column; 
             padding: 10px 12px; 
-            overflow: hidden; /* Evita rolagem desnecessária */
+            overflow: hidden; 
+            position: relative;
         }
         main.no-padding { padding: 0; }
 
-        .screen { 
-            display: none; 
-            height: 100%; 
-            width: 100%;
-        }
-        .screen.active { 
-            display: flex; 
-            flex-direction: column; 
-        }
+        .screen { display: none; height: 100%; width: 100%; }
+        .screen.active { display: flex; flex-direction: column; }
 
         .instruction-text {
             text-align: center; color: #666; font-size: 13px; margin-bottom: 8px; flex-shrink: 0;
         }
 
-        /* --- 3. GRADE QUE PREENCHE TUDO (MATEMÁTICA) --- */
+        /* --- GRID PERFEITO --- */
         .grid { 
             display: grid; 
-            grid-template-columns: 1fr 1fr; /* 2 Colunas */
-            grid-template-rows: repeat(4, 1fr); /* 4 Linhas IGUAIS que preenchem a altura */
+            grid-template-columns: 1fr 1fr; 
+            grid-template-rows: repeat(4, 1fr); 
             gap: 10px; 
-            flex: 1; /* Faz a grade crescer para ocupar o espaço em branco */
-            min-height: 0; /* Importante para o Grid funcionar dentro do Flex */
+            flex: 1; 
+            min-height: 0;
         }
         
         .card {
@@ -94,30 +88,74 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center;
-            /* Não definimos height fixa, ele usa o 1fr do grid */
-            width: 100%;
-            height: 100%; 
+            width: 100%; height: 100%; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
             cursor: pointer; 
             position: relative;
         }
         .card:active { transform: scale(0.98); opacity: 0.9; }
-        .card i { font-size: 36px; margin-bottom: 5px; } /* Ícone grande */
+        .card i { font-size: 36px; margin-bottom: 5px; }
         .card span { font-weight: bold; font-size: 14px; text-transform: uppercase; }
 
-        /* Cores */
+        /* CORES */
         .bg-blue { background-color: #1976D2; }
         .bg-red { background-color: #D32F2F; }
         .bg-yellow { background-color: #FBC02D; }
         .bg-green { background-color: #388E3C; }
         .bg-gray { background-color: #616161; }
         .bg-orange { background-color: #F57C00; }
-        .bg-brown { background-color: #E64A19; } /* Óleo */
+        .bg-brown { background-color: #E64A19; }
         .bg-dark { background-color: #455A64; }
 
-        /* OUTRAS TELAS */
-        .scrollable-content { overflow-y: auto; flex: 1; padding: 5px; } /* Para telas com texto longo */
+        /* --- ESTILOS ESPECÍFICOS DA TELA DE ROTAS (Restaurados) --- */
+        .map-container {
+            width: 100%; height: 100%; position: relative;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/ec/OpenStreetMap_im_Dortmunder_Westen.png'); 
+            background-size: cover; background-position: center;
+        }
         
+        /* Barra de Busca */
+        .search-bar-container {
+            position: absolute; top: 15px; left: 15px; right: 15px;
+            background: white; border-radius: 4px; padding: 0 15px; height: 48px;
+            display: flex; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 2;
+        }
+        .search-bar-container input { border: none; outline: none; flex: 1; font-size: 16px; margin-left: 10px; }
+
+        /* Botões Toggle (Rotas/Ecopontos) */
+        .toggle-container {
+            position: absolute; top: 75px; left: 15px; right: 15px;
+            display: flex; gap: 10px; z-index: 2;
+        }
+        .toggle-btn {
+            flex: 1; padding: 10px; border-radius: 25px; text-align: center;
+            font-weight: bold; font-size: 13px; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+        .toggle-active { background-color: #1b5e20; }
+        .toggle-inactive { background-color: #757575; }
+
+        /* Pino do Mapa */
+        .map-pin {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #F57C00; font-size: 45px; z-index: 1; text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Cartão Inferior (Aviso) */
+        .bottom-card-overlay {
+            position: absolute; bottom: 20px; left: 15px; right: 15px;
+            background: white; border-radius: 12px; padding: 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2); z-index: 2; text-align: center;
+        }
+        .bottom-card-text { font-size: 14px; color: #444; margin-bottom: 15px; line-height: 1.4; }
+        .bottom-card-btn {
+            background-color: #1b5e20; color: white; text-align: center;
+            padding: 12px; border-radius: 25px; font-weight: bold; font-size: 14px;
+            text-transform: uppercase; width: 100%; border: none; cursor: pointer;
+        }
+
+        /* OUTRAS TELAS */
+        .scrollable-content { overflow-y: auto; flex: 1; padding: 5px; }
         .btn-action {
             background-color: var(--primary); color: white; border: none; padding: 15px;
             border-radius: 8px; font-size: 16px; margin-top: auto; width: 100%;
@@ -133,19 +171,6 @@
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #757575; font-size: 10px; cursor: pointer; width: 25%; }
         .nav-item.active { color: var(--primary); }
         .nav-item i { font-size: 24px; margin-bottom: 2px; }
-
-        /* MAPA */
-        .map-container {
-            width: 100%; height: 100%; position: relative;
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/ec/OpenStreetMap_im_Dortmunder_Westen.png'); 
-            background-size: cover; background-position: center;
-        }
-        .search-bar-container {
-            position: absolute; top: 15px; left: 15px; right: 15px;
-            background: white; border-radius: 4px; padding: 0 15px; height: 48px;
-            display: flex; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 2;
-        }
-        .search-bar-container input { border: none; outline: none; flex: 1; font-size: 16px; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -193,7 +218,28 @@
 
             <div id="screen-routes" class="screen">
                 <div class="map-container">
-                    <div class="search-bar-container"><input type="text" placeholder="Qual material quer reciclar?"><i class="fas fa-search" style="color: #666;"></i></div>
+                    
+                    <div class="search-bar-container">
+                        <input type="text" placeholder="Digite o endereço desejado">
+                        <i class="fas fa-search" style="color: #666;"></i>
+                    </div>
+
+                    <div class="toggle-container">
+                        <div class="toggle-btn toggle-active">ROTAS</div>
+                        <div class="toggle-btn toggle-inactive">ECOPONTOS</div>
+                    </div>
+
+                    <i class="fas fa-map-marker-alt map-pin"></i>
+
+                    <div class="bottom-card-overlay">
+                        <p class="bottom-card-text">
+                            Sua localização não está na rota de coleta ou próxima a um ecoponto.
+                        </p>
+                        <button class="bottom-card-btn" onclick="alert('Buscando rotas alternativas...')">
+                            BUSCAR MEUS RECICLÁVEIS
+                        </button>
+                    </div>
+
                 </div>
             </div>
 
