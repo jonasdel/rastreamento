@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ReciclaLogo</title>
+    <title>Materiais Recicláveis</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -83,6 +83,41 @@
             gap: 10px; 
             margin-bottom: 20px;
         }
+
+        /* --- CAIXA COMPRAMOS --- */
+.buy-box{
+    background:#fff3cd;
+    border-left:6px solid #FF9800;
+    border-radius:10px;
+    padding:15px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-top:12px;
+    margin-bottom:20px;
+    box-shadow:0 2px 4px rgba(0,0,0,0.1);
+    cursor:pointer;
+}
+
+.buy-box:active{
+    transform:scale(0.98);
+}
+
+.buy-box i{
+    font-size:30px;
+    color:#FF9800;
+}
+
+.buy-text{
+    font-size:14px;
+    color:#333;
+    line-height:1.4;
+}
+
+.buy-text strong{
+    font-size:15px;
+    color:#000;
+}
         
         .card {
             border-radius: 10px;
@@ -346,33 +381,73 @@
     <div id="app-frame">
         <header>
             <i class="fas fa-arrow-left header-icon" id="backBtn" onclick="goBack()" style="visibility: hidden;"></i>
-            <div class="header-title" id="headerTitle">ReciclaLogo</div>
+            <div class="header-title" id="headerTitle">Materiais Recicláveis</div>
             <i class="fas fa-ellipsis-v header-icon"></i>
         </header>
 
         <main id="main-content">
             
-            <!-- HOME -->
-            <div id="screen-home" class="screen active">
-                <div class="home-container">
-                    <div class="grid">
-                        <div class="card bg-blue" onclick="openDetails('Papel')"><i class="far fa-file-alt"></i><span>PAPEL</span></div>
-                        <div class="card bg-red" onclick="openDetails('Plástico')"><i class="fas fa-wine-bottle"></i><span>PLÁSTICO</span></div>
-                        <div class="card bg-yellow" onclick="openDetails('Metal')"><i class="fas fa-beer"></i><span>METAL</span></div>
-                        <div class="card bg-green" onclick="openDetails('Vidro')"><i class="fas fa-wine-glass"></i><span>VIDRO</span></div>
-                        <div class="card bg-gray" onclick="openDetails('Eletrônicos')"><i class="fas fa-desktop"></i><span>ELETRÔNICOS</span></div>
-                        <div class="card bg-orange" onclick="openDetails('Pilhas')"><i class="fas fa-battery-full"></i><span>PILHAS E BATERIAS</span></div>
-                    </div>
+        <!-- HOME -->
+<div id="screen-home" class="screen active">
+    <div class="home-container">
 
-                    <div class="association-section">
-                        <div class="assoc-title">Quem Somos: ASSCAVAG</div>
-                        <p class="assoc-text">
-                            A Associação dos Catadores de Materiais Recicláveis de Várzea Grande (ASSCAVAG) é mais que uma prestadora de serviços; somos agentes de transformação.
-                        </p>
-                        <button class="btn-read-more" onclick="openModal()">LEIA MAIS SOBRE OS PLANOS</button>
-                    </div>
-                </div>
+        <div class="grid">
+            <div class="card bg-blue" onclick="openDetails('Papel')">
+                <i class="far fa-file-alt"></i>
+                <span>PAPEL</span>
             </div>
+
+            <div class="card bg-red" onclick="openDetails('Plástico')">
+                <i class="fas fa-wine-bottle"></i>
+                <span>PLÁSTICO</span>
+            </div>
+
+            <div class="card bg-yellow" onclick="openDetails('Metal')">
+                <i class="fas fa-beer"></i>
+                <span>METAL</span>
+            </div>
+
+            <div class="card bg-green" onclick="openDetails('Vidro')">
+                <i class="fas fa-wine-glass"></i>
+                <span>VIDRO</span>
+            </div>
+
+            <div class="card bg-gray" onclick="openDetails('Eletrônicos')">
+                <i class="fas fa-desktop"></i>
+                <span>ELETRÔNICOS</span>
+            </div>
+
+            <div class="card bg-orange" onclick="openDetails('Pilhas')">
+                <i class="fas fa-battery-full"></i>
+                <span>PILHAS E BATERIAS</span>
+            </div>
+        </div>
+
+        <!-- CAIXA COMPRAMOS -->
+        <div class="buy-box" onclick="window.open('https://wa.me/5565999999999','_blank')">
+            <i class="fas fa-coins"></i>
+            <div class="buy-text">
+                <strong>COMPRAMOS:</strong><br>
+                Ferro • Cobre • Latinha de Alumínio
+            </div>
+        </div>
+
+        <div class="association-section">
+            <div class="assoc-title">Quem Somos: ASSCAVAG</div>
+
+            <p class="assoc-text">
+                A Associação dos Catadores de Materiais Recicláveis de Várzea Grande (ASSCAVAG)
+                é mais que uma prestadora de serviços; somos agentes de transformação ambiental,
+                promovendo sustentabilidade e geração de renda através da reciclagem.
+            </p>
+
+            <button class="btn-read-more" onclick="openModal()">
+                LEIA MAIS SOBRE OS PLANOS
+            </button>
+        </div>
+
+    </div>
+</div>
 
             <!-- DETAILS -->
             <div id="screen-details" class="screen">
@@ -554,16 +629,63 @@
                     </p>
                 </div>
             </div>
+          
+         <!-- CONTATO -->
+<div id="screen-contact" class="screen">
+    <div class="form-container">
 
-            <!-- CONTATO -->
-            <div id="screen-contact" class="screen">
-                <div class="form-container">
-                    <h2 style="color: var(--primary);">Fale Conosco</h2>
-                    <input class="form-input" placeholder="Seu Nome">
-                    <textarea class="form-input" style="height:120px" placeholder="Sua Mensagem"></textarea>
-                    <button class="btn-action" onclick="alert('Mensagem enviada com sucesso!')">ENVIAR</button>
-                </div>
-            </div>
+        <h2 style="color: var(--primary);">Contato</h2>
+
+        <div style="margin-top:20px; line-height:32px; font-size:16px;">
+
+            <p>
+                📧 <strong>E-mail:</strong> 
+                <a href="mailto:asscavag.associacao@gmail.com">
+                asscavag.associacao@gmail.com
+                </a>
+            </p>
+
+            <p>
+                <i class="fab fa-facebook" style="color:#1877F2;"></i>
+                <strong>Facebook:</strong> 
+                <a href="https://www.facebook.com/asscavag/" target="_blank">
+                facebook.com/asscavag
+                </a>
+            </p>
+
+            <p>
+                <i class="fab fa-instagram" style="color:#E4405F;"></i>
+                <strong>Instagram:</strong> @asscavag
+            </p>
+
+            <p>
+                <i class="fas fa-user"></i>
+                <strong>Presidente:</strong> Isaias - 
+                <a href="tel:+5565981460069">(65) 98146-0069</a>
+            </p>
+
+            <p>
+                <i class="fas fa-building"></i>
+                <strong>Escritório:</strong> ASSCAVAG - 
+                <a href="tel:+556536821297">(65) 3682-1297</a>
+            </p>
+
+            <p>
+                <i class="fas fa-user"></i>
+                <strong>Articuladora:</strong> Valquiria - 
+                <a href="tel:+556599314557">(65) 99314-557</a>
+            </p>
+
+            <p>
+                <i class="fas fa-user"></i>
+                <strong>Tesoureira:</strong> Joana - 
+                <a href="tel:+5565981460126">(65) 98146-0126</a>
+            </p>
+
+        </div>
+
+    </div>
+</div>
 
         </main>
 
@@ -667,7 +789,7 @@
             mainContent.scrollTop = 0;
 
             if (screenId === 'home') {
-                title.innerText = 'ReciclaLogo';
+                title.innerText = 'Materiais Recicláveis';
                 backBtn.style.visibility = 'hidden';
             } else if (screenId === 'routes') {
                 title.innerText = 'Rotas e Ecopontos';
@@ -679,7 +801,7 @@
                 title.innerText = 'Relatórios';
                 backBtn.style.visibility = 'visible';
             } else {
-                title.innerText = 'ReciclaLogo';
+                title.innerText = 'Contatos';
                 backBtn.style.visibility = 'visible';
             }
         }
