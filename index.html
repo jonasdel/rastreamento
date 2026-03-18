@@ -6,8 +6,10 @@
     <title>Materiais Recicláveis</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         :root {
@@ -541,7 +543,19 @@
             <!-- RELATÓRIOS -->
             <div id="screen-reports" class="screen">
                 <div class="reports-container">
-                    <h2 style="color: var(--primary); margin-bottom:15px;">Relatórios</h2>
+                         <h2 style="color: var(--primary); margin-bottom:10px;">Relatórios</h2>
+
+                        <div style="display:flex; gap:10px; margin-bottom:15px;">
+                        <button class="btn-action" style="margin-top:0; padding:12px;" onclick="salvarRelatorio()">
+                      <i class="fas fa-download"></i> SALVAR
+                    </button>
+
+                  <button class="btn-action" style="background:#c62828; margin-top:0; padding:12px;" onclick="limparRelatorio()">
+                  <i class="fas fa-trash"></i> LIMPAR
+                   </button>
+                        </div>
+
+
 
                     <div class="chart-box">
                         <canvas id="barChart" height="200"></canvas>
@@ -1200,74 +1214,297 @@
                 container.innerHTML = `<p style="text-align:center; color:#999; margin-top:20px;">Erro ao carregar cadastros.</p>`;
             }
         }
+// PAINEL COLETAS + GRÁFICO
+async function carregarPainel(){
+    if(!supabaseClient) return;
+    const container = document.getElementById("listaColetas");
+    
+    try {
+        const { data, error } = await supabaseClient
+            .from('coletas')
+            .select('*')
+            .order('id', {ascending: false});
 
-        // PAINEL COLETAS + GRÁFICO
-        async function carregarPainel(){
-            if(!supabaseClient) return;
-            const container = document.getElementById("listaColetas");
-            
-            try {
-                const { data, error } = await supabaseClient
-                    .from('coletas')
-                    .select('*')
-                    .order('id', {ascending: false});
+        if(error) throw error;
 
-                if(error) throw error;
+        container.innerHTML = "";
+        let totais = { 'Papel':0, 'Vidro':0, 'Plástico':0, 'Metal':0, 'Eletrônicos':0, 'Pilhas e Baterias':0 };
 
-                container.innerHTML = "";
-                let totais = { 'Papel':0, 'Vidro':0, 'Plástico':0, 'Metal':0, 'Eletrônicos':0, 'Pilhas e Baterias':0 };
+        data.forEach(item => {
+            let peso = parseFloat(item.quantidade) || 0;
+            if(totais[item.material] !== undefined) totais[item.material] += peso;
 
-                data.forEach(item => {
-                    let peso = parseFloat(item.quantidade) || 0;
-                    if(totais[item.material] !== undefined) totais[item.material] += peso;
+            const imgTag = item.foto_base64 
+                ? `<div class="report-img-container"><img src="${item.foto_base64}" class="report-img"></div>` 
+                : '';
 
-                    const imgTag = item.foto_base64 
-                        ? `<div class="report-img-container"><img src="${item.foto_base64}" class="report-img"></div>` 
-                        : '';
-
-                    const card = `
-                        <div class="report-card">
-                            <div class="report-card-content">
-                                <div class="report-top">
-                                    <div class="report-title">${item.material}</div>
-                                    <div class="report-time">${item.data_coleta || 'Hoje'}</div>                                
-                                </div>
-                                <div class="report-sub">
-                                    <strong>Empresa:</strong> ${item.empresa}<br>
-                                    <strong>Quantidade:</strong> ${peso} kg
-                                </div>
-                                ${imgTag}
-                            </div>
+            const card = `
+                <div class="report-card">
+                    <div class="report-card-content">
+                        <div class="report-top">
+                            <div class="report-title">${item.material}</div>
+                            <div class="report-time">${item.data_coleta || 'Hoje'}</div>                                
                         </div>
-                    `;
-                    container.innerHTML += card;
-                });
+                        <div class="report-sub">
+                            <strong>Empresa:</strong> ${item.empresa}<br>
+                            <strong>Quantidade:</strong> ${peso} kg
+                        </div>
+                        ${imgTag}
+                    </div>
+                </div>
+            `;
+            container.innerHTML += card;
+        });
 
-                if(window.myChart) window.myChart.destroy();
-                const ctx = document.getElementById('barChart');
-                window.myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Papel', 'Vidro', 'Plástico', 'Metal', 'Eletrônicos', 'Pilhas e Baterias'],
-                        datasets: [{
-                            label: 'Kg',
-                            data: [
-                                totais['Papel'],
-                                totais['Vidro'],
-                                totais['Plástico'],
-                                totais['Metal'],
-                                totais['Eletrônicos'],
-                                totais['Pilhas e Baterias']
-                            ],
-                            backgroundColor: ['#1976D2', '#388E3C', '#D32F2F', '#FBC02D', '#455A64', '#EF6C00']
-                        }]
-                    }
-                });
-
-            } catch(e) {
-                container.innerHTML = "Erro ao carregar.";
+        if(window.myChart) window.myChart.destroy();
+        const ctx = document.getElementById('barChart');
+        window.myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Papel', 'Vidro', 'Plástico', 'Metal', 'Eletrônicos', 'Pilhas e Baterias'],
+                datasets: [{
+                    label: 'Kg',
+                    data: [
+                        totais['Papel'],
+                        totais['Vidro'],
+                        totais['Plástico'],
+                        totais['Metal'],
+                        totais['Eletrônicos'],
+                        totais['Pilhas e Baterias']
+                    ],
+                    backgroundColor: ['#1976D2', '#388E3C', '#D32F2F', '#FBC02D', '#455A64', '#EF6C00']
+                }]
             }
+        });
+
+    } catch(e) {
+        container.innerHTML = "Erro ao carregar.";
+        console.error(e);
+    }
+}
+
+// --- FUNÇÃO PARA GERAR O PDF DO RELATÓRIO (FORMATO TABELA OFICIAL) ---
+async function salvarRelatorio() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'pt', 'a4');
+
+    // Tenta encontrar a conexão correta
+    const banco = (typeof supabaseClient !== 'undefined') ? supabaseClient : 
+                  (typeof supabase !== 'undefined') ? supabase : 
+                  (typeof client !== 'undefined') ? client : window.supabase;
+
+    if (!banco || typeof banco.from !== 'function') {
+        alert("Erro de conexão: O objeto do banco de dados não foi reconhecido.");
+        return;
+    }
+
+    const btn = event.currentTarget;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> BUSCANDO DADOS...';
+    btn.disabled = true;
+
+    try {
+        // 1. BUSCA NAS DUAS TABELAS (Coletas e Cadastros)
+        const [resColetas, resCadastros] = await Promise.all([
+            banco.from('coletas').select('*'),
+            banco.from('cadastros').select('*')
+        ]);
+
+        if (resColetas.error) throw resColetas.error;
+        if (resCadastros.error) throw resCadastros.error;
+
+        const coletas = resColetas.data || [];
+        const empresas = resCadastros.data || [];
+
+        let y = 60; 
+        const margem = 40;
+
+        // Cabeçalho do PDF
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(18);
+        doc.setTextColor(27, 94, 32); // Verde ASSCAVAG
+        doc.text("RELATÓRIO DE COLETA - ASSCAVAG", margem, y);
+        
+        y += 20;
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Data de Emissão: ${new Date().toLocaleString('pt-BR')}`, margem, y);
+        
+        y += 10;
+        doc.setDrawColor(200);
+        doc.line(margem, y, 550, y); 
+        y += 30;
+
+        // 2. SEÇÃO DE COLETAS
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0);
+        doc.text("MATERIAL", margem, y);
+        doc.text("DATA", 160, y);
+        doc.text("EMPRESA", 260, y);
+        doc.text("QTD (KG)", 480, y);
+        
+        y += 10;
+        doc.line(margem, y, 550, y);
+        y += 20;
+
+        doc.setFont("helvetica", "normal");
+        let totalGeral = 0;
+        let resumoMaterial = {};
+
+        coletas.forEach((item) => {
+            if (y > 780) { doc.addPage(); y = 50; }
+
+            const dataBruta = item.created_at || item.data || item.inserted_at || new Date();
+            let dataExibicao;
+            const d = new Date(dataBruta);
+            dataExibicao = isNaN(d.getTime()) ? "---" : d.toLocaleDateString('pt-BR');
+
+            const qtd = parseFloat(item.quantidade || 0);
+            totalGeral += qtd;
+            resumoMaterial[item.material] = (resumoMaterial[item.material] || 0) + qtd;
+
+            doc.text(String(item.material || "Outros"), margem, y);
+            doc.text(dataExibicao, 160, y);
+            doc.text(String(item.empresa || "---").substring(0, 25), 260, y);
+            doc.text(qtd.toFixed(2), 480, y);
+            y += 20;
+        });
+
+        // 3. RESUMO POR MATERIAL
+        y += 20;
+        if (y > 700) { doc.addPage(); y = 50; }
+        
+        doc.setFont("helvetica", "bold");
+        doc.setFillColor(240, 240, 240); 
+        doc.rect(margem, y, 510, 25, 'F');
+        doc.text("RESUMO POR MATERIAL", margem + 10, y + 17);
+        y += 40;
+
+        for (const mat in resumoMaterial) {
+            doc.setFont("helvetica", "normal");
+            doc.text(mat, margem + 10, y);
+            doc.text(`${resumoMaterial[mat].toFixed(2)} kg`, 480, y);
+            y += 15;
         }
-    </script>
+
+        y += 30;
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("PESO TOTAL ACUMULADO:", margem, y);
+        doc.text(`${totalGeral.toFixed(2)} kg`, 480, y);
+
+        // 4. SEÇÃO DE EMPRESAS CADASTRADAS
+        y += 50;
+        if (y > 650) { doc.addPage(); y = 50; }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.setTextColor(27, 94, 32);
+        doc.text("EMPRESAS PARCEIRAS CADASTRADAS", margem, y);
+        y += 10;
+        doc.setDrawColor(27, 94, 32);
+        doc.line(margem, y, 550, y);
+        y += 25;
+
+        empresas.forEach(emp => {
+            if (y > 720) { doc.addPage(); y = 50; }
+            
+            // Desenha a moldura do card
+            doc.setDrawColor(200);
+            doc.rect(margem, y, 510, 70); 
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.setTextColor(0);
+            doc.text(`Nome: ${emp.nome || emp.empresa || '---'}`, margem + 10, y + 15);
+            
+            doc.setFontSize(11);
+            doc.setTextColor(180, 0, 0); // Cor de alerta para o status
+            doc.text(String(emp.status || "PENDENTE PAGAMENTO"), 400, y + 15);
+
+            doc.setTextColor(60);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text(`CNPJ: ${emp.cnpj || '---'}`, margem + 10, y + 30);
+            doc.text(`Endereço: ${emp.endereco || '---'}`, margem + 10, y + 42);
+            doc.text(`Tipo: ${emp.tipo || '---'} | Resíduos: ${emp.residuos || '---'}`, margem + 10, y + 54);
+            doc.text(`Valor: ${emp.valor || '---'} | Certificado: ${emp.certificado || '---'}`, margem + 10, y + 66);
+            y += 100;
+        });
+
+        // 5. SALVAR
+        doc.save(`Relatorio_ASSCAVAG_Completo.pdf`);
+
+    } catch (e) {
+        console.error("Erro no PDF:", e);
+        alert("Erro ao gerar PDF: " + e.message);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+
+    
+    
+        async function gerarCertificado(nomeEmpresa) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'pt', 'a4'); 
+
+    const banco = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    if (!banco) {
+        alert("Conexão não encontrada.");
+        return;
+    }
+
+    try {
+        // 1. Busca dados da empresa
+        const { data: empresaData } = await banco.from('cadastros')
+            .select('*')
+            .ilike('nome', nomeEmpresa)
+            .single();
+
+        // 2. Calcula o total reciclado
+        const { data: coletas } = await banco.from('coletas')
+            .select('quantidade')
+            .ilike('empresa', nomeEmpresa);
+
+        const totalKg = coletas ? coletas.reduce((acc, curr) => acc + parseFloat(curr.quantidade || 0), 0) : 0;
+
+        // --- LAYOUT DO CERTIFICADO ---
+        const largura = doc.internal.pageSize.getWidth();
+        const altura = doc.internal.pageSize.getHeight();
+
+        doc.setDrawColor(27, 94, 32);
+        doc.setLineWidth(5);
+        doc.rect(20, 20, largura - 40, altura - 40); 
+        
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(30);
+        doc.setTextColor(27, 94, 32);
+        doc.text("CERTIFICADO DE DESTINAÇÃO FINAL", largura / 2, 100, { align: "center" });
+
+        doc.setFont("times", "normal");
+        doc.setFontSize(20);
+        doc.setTextColor(0);
+        const texto = `Certificamos que a empresa ${nomeEmpresa.toUpperCase()}, CNPJ ${empresaData?.cnpj || '---'}, destinou corretamente através da ASSCAVAG o total de:`;
+        const splitText = doc.splitTextToSize(texto, largura - 150);
+        doc.text(splitText, largura / 2, 200, { align: "center" });
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(28);
+        doc.text(`${totalKg.toFixed(2)} KG DE RESÍDUOS`, largura / 2, 300, { align: "center" });
+
+        doc.setFontSize(12);
+        doc.text(`Emitido em: ${new Date().toLocaleDateString('pt-BR')}`, largura / 2, 380, { align: "center" });
+
+        doc.save(`Certificado_${nomeEmpresa}.pdf`);
+    } catch (e) {
+        alert("Erro ao gerar: " + e.message);
+    }
+}
+    }
+}
+
+</script>
+
 </body>
 </html>
