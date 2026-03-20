@@ -1549,16 +1549,6 @@ function fazerLogin(){
         erro.innerText = "Usuário ou senha inválidos";
     }
 }
-
-// verifica ao abrir
-window.addEventListener("load", () => {
-    const logado = localStorage.getItem("logado");
-
-    if(logado === "true"){
-        document.getElementById("login-screen").style.display = "none";
-    }
-});
-
 }
     }
 
@@ -1569,7 +1559,6 @@ function fazerLogin(){
     const erro = document.getElementById("login-erro");
 
     if(email === "asscavag" && senha === "Val40je37"){
-        localStorage.setItem("logado", "true");
         document.getElementById("login-screen").style.display = "none";
     } else {
         erro.innerText = "Usuário ou senha inválidos";
